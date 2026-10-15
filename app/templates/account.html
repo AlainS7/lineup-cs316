@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% from "_form.html" import render_field %}
+{% from "_macros.html" import status_badge %}
+{% set title = 'Account' %}
+{% block content %}
+<div class="row g-4">
+  <div class="col-lg-5">
+    <div class="card mb-4"><div class="card-body">
+      <h4>Balance</h4>
+      <p class="display-6 text-success font-monospace">${{ '%.2f'|format(current_user.balance) }}</p>
+      <form method="post" novalidate class="row g-2 align-items-end">
+        {{ funds.hidden_tag() }}
+        <div class="col-6">{{ funds.amount.label(class="form-label") }}{{ funds.amount(class="form-control", placeholder="0.00") }}
+          {% for e in funds.amount.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}</div>
+        <div class="col-3 d-grid">{{ funds.topup(class="btn btn-success") }}</div>
+        <div class="col-3 d-grid">{{ funds.withdraw(class="btn btn-outline-secondary") }}</div>
+      </form>
+    </div></div>
+
+    <div class="card"><div class="card-body">
+      <h4>Profile</h4>
+      <p class="text-muted small">Account #{{ current_user.id }} · member since {{ current_user.created_at.strftime('%b %d, %Y') }}
+        · <a href="{{ url_for('users.public_profile', id=current_user.id) }}">public view</a></p>
+      <form method="post" novalidate>
+        {{ form.hidden_tag() }}
+        {{ render_field(form.full_name) }}
+        {{ render_field(form.email) }}
+        {{ render_field(form.address) }}
+        {{ render_field(form.password) }}
+        {{ render_field(form.password2) }}
+        {{ form.submit(class="btn btn-primary") }}
+      </form>
+    </div></div>
+  </div>
+
+  <div class="col-lg-7">
+    <div class="card mb-4"><div class="card-body">
+      <h4>Book</h4>
+      {% if book %}
+        <p>You run <a href="{{ url_for('books.dashboard') }}"><strong>{{ book.name }}</strong></a>.</p>
+      {% else %}
+        <p class="mb-0">Want to post your own lines? <a href="{{ url_for('books.create') }}">Open a book</a>.</p>
+      {% endif %}
+    </div></div>
+
+    <div class="card mb-4"><div class="card-body">
+      <h4>Recent bets <a class="btn btn-sm btn-outline-secondary float-end" href="{{ url_for('bets.history') }}">All bets</a></h4>
+      <table class="table table-sm mb-0">
+        {% for s in recent %}
+        <tr><td><a href="{{ url_for('bets.detail', id=s.id) }}">#{{ s.id }}</a> {{ s.kind }} · {{ s.games }}</td>
+            <td class="text-end font-monospace">${{ '%.2f'|format(s.stake) }}</td><td class="text-end">{{ status_badge(s.status) }}</td></tr>
+        {% else %}<tr><td class="text-muted">No bets yet.</td></tr>{% endfor %}
+      </table>
+    </div></div>
+
+    <div class="card"><div class="card-body">
+      <h4>Balance history</h4>
+      <table class="table table-sm mb-0">
+        <thead><tr><th>When</th><th>Type</th><th>Bet</th><th class="text-end">Amount</th></tr></thead>
+        {% for t in transactions %}
+        <tr><td>{{ t.created_at.strftime('%b %d %I:%M %p') }}</td><td>{{ t.kind }}</td>
+            <td>{% if t.slip_id %}<a href="{{ url_for('bets.detail', id=t.slip_id) }}">#{{ t.slip_id }}</a>{% endif %}</td>
+            <td class="text-end font-monospace {{ 'text-success' if t.amount > 0 else 'text-danger' }}">{{ '%+.2f'|format(t.amount) }}</td></tr>
+        {% else %}<tr><td colspan="4" class="text-muted">No transactions yet.</td></tr>{% endfor %}
+      </table>
+    </div></div>
+  </div>
+</div>
+{% endblock %}

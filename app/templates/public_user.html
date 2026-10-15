@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card"><div class="card-body">
+  <h2>{{ u.full_name }} <small class="text-muted fs-6">account #{{ u.id }}</small></h2>
+  <p class="text-muted">Member since {{ u.created_at.strftime('%B %d, %Y') }}</p>
+  <div class="row text-center">
+    <div class="col"><div class="fs-3">{{ u.wins }}–{{ u.losses }}{% if u.pushes %}–{{ u.pushes }}{% endif %}</div><div class="text-muted">record (W–L{% if u.pushes %}–P{% endif %})</div></div>
+    <div class="col"><div class="fs-3 font-monospace {{ 'text-success' if u.net >= 0 else 'text-danger' }}">{{ '%+.2f'|format(u.net) }}</div><div class="text-muted">net winnings</div></div>
+    <div class="col"><div class="fs-3">{{ u.pending }}</div><div class="text-muted">open bets</div></div>
+  </div>
+  {% if u.book_id %}<p class="mt-3 mb-0">Runs the book <a href="{{ url_for('books.public', id=u.book_id) }}">{{ u.book_name }}</a>.</p>{% endif %}
+</div></div>
+{% endblock %}

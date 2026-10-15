@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% set title = 'Leaderboard' %}
+{% block content %}
+<h2>Leaderboard</h2>
+<p class="text-muted">Ranked by net winnings on settled bets.</p>
+<table class="table bg-white">
+  <thead class="table-light"><tr><th>#</th><th>User</th><th class="text-end">Record</th><th class="text-end">Wagered</th><th class="text-end">Net</th></tr></thead>
+  <tbody>
+  {% for r in rows %}
+  <tr><td>{{ loop.index }}</td><td><a href="{{ url_for('users.public_profile', id=r.id) }}">{{ r.full_name }}</a></td>
+      <td class="text-end">{{ r.wins }}–{{ r.losses }}</td>
+      <td class="text-end font-monospace">${{ '%.2f'|format(r.wagered) }}</td>
+      <td class="text-end font-monospace {{ 'text-success' if r.net >= 0 else 'text-danger' }}">{{ '%+.2f'|format(r.net) }}</td></tr>
+  {% else %}<tr><td colspan="5" class="text-muted text-center py-4">Nothing settled yet.</td></tr>{% endfor %}
+  </tbody>
+</table>
+{% endblock %}
