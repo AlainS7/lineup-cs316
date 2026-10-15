@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% from "_macros.html" import status_badge %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-end mb-3">
+  <h2 class="mb-0">{% if status == 'final' %}Results{% elif status == 'all' %}All games{% else %}Upcoming games{% endif %}</h2>
+  <span class="text-muted">{{ games|length }} games</span>
+</div>
+
+<form class="row g-2 mb-3" method="get">
+  <div class="col-md-3">
+    <select class="form-select" name="sport">
+      <option value="">All sports</option>
+      {% for s in sports %}<option value="{{ s.key }}" {% if s.key == sport %}selected{% endif %}>{{ s.name }}</option>{% endfor %}
+    </select>
+  </div>
+  <div class="col-md-3"><input class="form-control" name="q" value="{{ q }}" placeholder="Search team"></div>
+  <div class="col-md-2">
+    <select class="form-select" name="status">
+      <option value="upcoming" {% if status == 'upcoming' %}selected{% endif %}>Upcoming</option>
+      <option value="final" {% if status == 'final' %}selected{% endif %}>Final</option>
+      <option value="all" {% if status == 'all' %}selected{% endif %}>All</option>
+    </select>
+  </div>
+  <div class="col-md-2">
+    <select class="form-select" name="sort">
+      <option value="time" {% if sort == 'time' %}selected{% endif %}>Soonest first</option>
+      <option value="time_desc" {% if sort == 'time_desc' %}selected{% endif %}>Latest first</option>
+      <option value="sport" {% if sort == 'sport' %}selected{% endif %}>By sport</option>
+      <option value="lines" {% if sort == 'lines' %}selected{% endif %}>Most lines</option>
+    </select>
+  </div>
+  <div class="col-md-2 d-grid"><button class="btn btn-primary">Filter</button></div>
+</form>
+
+<div class="table-responsive">
+<table class="table table-hover align-middle bg-white">
+  <thead class="table-light"><tr>
+    <th>Sport</th><th>Matchup</th><th>Start</th><th>Status</th>
+    <th class="text-end">Best ML (away / home)</th><th class="text-end">Lines</th><th></th>
+  </tr></thead>
+  <tbody>
+  {% for g in games %}
+  <tr>
+    <td><span class="badge bg-secondary">{{ g.sport }}</span></td>
+    <td><a class="fw-semibold text-decoration-none" href="{{ url_for('games.detail', id=g.id) }}">{{ g.away_team }} @ {{ g.home_team }}</a></td>
+    <td>{{ g.start_time.strftime('%a %b %d, %I:%M %p') }}</td>
+    <td>{{ status_badge(g.status) }}
+      {% if g.status == 'final' %}<span class="ms-1">{{ g.away_score }}–{{ g.home_score }}</span>{% endif %}</td>
+    <td class="text-end font-monospace">
+      {% if g.away_ml is not none %}{{ g.away_ml|american }}{% else %}—{% endif %} /
+      {% if g.home_ml is not none %}{{ g.home_ml|american }}{% else %}—{% endif %}
+    </td>
+    <td class="text-end">{{ g.line_count }} <small class="text-muted">({{ g.book_count }} books)</small></td>
+    <td class="text-end"><a class="btn btn-sm btn-outline-primary" href="{{ url_for('games.detail', id=g.id) }}">View lines</a></td>
+  </tr>
+  {% else %}
+  <tr><td colspan="7" class="text-center text-muted py-4">No games match. Try <code>flask ingest</code> to pull the latest schedule.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endblock %}

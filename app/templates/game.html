@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% from "_macros.html" import status_badge, exposure_bar %}
+{% set title = game.away_abbr ~ ' @ ' ~ game.home_abbr %}
+{% block content %}
+<nav aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="{{ url_for('index.index') }}">Games</a></li>
+  <li class="breadcrumb-item active">{{ game.away_abbr }} @ {{ game.home_abbr }}</li></ol></nav>
+<div class="card mb-4">
+  <div class="card-body d-flex flex-wrap justify-content-between align-items-center">
+    <div>
+      <span class="badge bg-secondary mb-2">{{ game.sport }}</span>
+      <h2 class="mb-1">{{ game.away_team }} <span class="text-muted">@</span> {{ game.home_team }}</h2>
+      <div class="text-muted">{{ game.start_time.strftime('%A, %B %d · %I:%M %p') }} · {{ status_badge(game.status) }}</div>
+    </div>
+    {% if game.status == 'final' %}
+    <div class="display-6 font-monospace">{{ game.away_abbr }} {{ game.away_score }} – {{ game.home_score }} {{ game.home_abbr }}</div>
+    {% endif %}
+  </div>
+</div>
+
+{% set bettable = game.status == 'scheduled' %}
+{% if not bettable %}<div class="alert alert-secondary">This game has started or finished; its lines are closed.</div>{% endif %}
+
+{% for market, label in [('moneyline', 'Moneyline'), ('spread', 'Point spread'), ('total', 'Total points')] %}
+{% if market in grouped %}
+<h4 class="mt-4">{{ label }}</h4>
+<div class="row g-3">
+  {% for side, lines in grouped[market].items() %}
+  <div class="col-md-6">
+    <div class="card h-100">
+      <div class="card-header fw-semibold">
+        {% if side == 'home' %}{{ game.home_team }}{% elif side == 'away' %}{{ game.away_team }}{% else %}{{ side|capitalize }}{% endif %}
+      </div>
+      <table class="table table-sm mb-0 align-middle">
+        <thead><tr><th>Book</th><th>Line</th><th class="text-end">Odds</th><th>Exposure used</th><th></th></tr></thead>
+        <tbody>
+        {% for l in lines %}
+        <tr class="{% if not l.is_open %}table-secondary text-muted{% endif %}">
+          <td><a href="{{ url_for('books.public', id=l.book_id) }}" class="text-decoration-none">{{ l.book_name }}</a></td>
+          <td>{{ l.market|line(l.side, l.line_value, game.home_abbr, game.away_abbr) }}</td>
+          <td class="text-end font-monospace fw-bold">{{ l.odds_american|american }}
+            <small class="text-muted fw-normal">({{ '%.2f'|format(l.odds_american|decimal_odds) }})</small></td>
+          <td>{{ exposure_bar(l.exposure, l.exposure_limit) }}</td>
+          <td class="text-end" style="min-width: 190px;">
+            {% if not l.is_open or not bettable %}
+              <span class="badge bg-secondary">closed</span>
+            {% elif l.id in in_cart %}
+              <a class="btn btn-sm btn-outline-success" href="{{ url_for('slip.view') }}">In slip ✓</a>
+            {% elif current_user.is_authenticated %}
+              <form class="d-flex gap-1" method="post" action="{{ url_for('games.add_to_slip', line_id=l.id) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="input-group input-group-sm">
+                  <span class="input-group-text">$</span>
+                  <input class="form-control" name="stake" type="number" step="0.01" min="0.01" value="10" style="width: 70px;">
+                </div>
+                <button class="btn btn-sm btn-primary">Add</button>
+              </form>
+            {% else %}
+              <a class="btn btn-sm btn-outline-primary" href="{{ url_for('users.login', next=request.path) }}">Log in to bet</a>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+{% endfor %}
+{% if not grouped %}<p class="text-muted">No book has posted lines on this game yet.</p>{% endif %}
+
+{% if current_user.is_authenticated and bettable %}
+<p class="mt-4"><a class="btn btn-outline-secondary btn-sm" href="{{ url_for('books.new_line', game_id=game.id) }}">Run a book? Post your own line on this game</a></p>
+{% endif %}
+{% endblock %}
