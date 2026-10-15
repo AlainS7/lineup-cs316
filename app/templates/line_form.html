@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% from "_form.html" import render_field %}
+{% block content %}
+<div class="row justify-content-center"><div class="col-md-7"><div class="card"><div class="card-body">
+  <h3>{{ title }}</h3>
+  {% if line %}
+  <p class="text-muted">{{ line.away_team }} @ {{ line.home_team }} · {{ line.market }} / {{ line.side }}.
+    Changing the odds or line only affects new bets; {{ line.pending_slips }} pending bet(s) keep what they locked in.</p>
+  {% else %}
+  <p class="text-muted">Spread handicaps are written from this side's point of view: a 2.5-point home favorite is Home <code>-2.5</code> and Away <code>+2.5</code>. Totals take the total points. Moneylines leave the line value blank.</p>
+  {% endif %}
+  <form method="post" novalidate>
+    {{ form.hidden_tag() }}
+    {% if line %}{{ form.game_id(class="d-none") }}{% else %}{{ render_field(form.game_id) }}{% endif %}
+    <div class="row"><div class="col-6">{{ render_field(form.market) }}</div><div class="col-6">{{ render_field(form.side) }}</div></div>
+    {{ render_field(form.line_value) }}
+    {{ render_field(form.odds_american) }}
+    {{ render_field(form.exposure_limit) }}
+    {{ render_field(form.is_open) }}
+    {{ form.submit(class="btn btn-primary") }}
+    <a class="btn btn-link" href="{{ url_for('books.dashboard') }}">Cancel</a>
+  </form>
+</div></div></div></div>
+{% endblock %}

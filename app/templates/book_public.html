@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% from "_macros.html" import exposure_bar %}
+{% set title = book.name %}
+{% block content %}
+<h2>{{ book.name }}</h2>
+<p class="text-muted">Run by <a href="{{ url_for('users.public_profile', id=book.owner_id) }}">{{ book.owner_name }}</a> · since {{ book.created_at.strftime('%b %d, %Y') }}</p>
+<table class="table bg-white align-middle table-sm">
+  <thead class="table-light"><tr><th>Game</th><th>Start</th><th>Pick</th><th class="text-end">Odds</th><th>Exposure</th><th></th></tr></thead>
+  <tbody>
+  {% for l in lines %}
+  <tr>
+    <td>{{ l.away_abbr }} @ {{ l.home_abbr }}</td><td><small>{{ l.start_time.strftime('%b %d %I:%M %p') }}</small></td>
+    <td class="fw-semibold">{{ l.market|line(l.side, l.line_value, l.home_abbr, l.away_abbr) }}</td>
+    <td class="text-end font-monospace">{{ l.odds_american|american }}</td>
+    <td>{{ exposure_bar(l.exposure, l.exposure_limit) }}</td>
+    <td class="text-end"><a class="btn btn-sm btn-outline-primary" href="{{ url_for('games.detail', id=l.game_id) }}">Bet</a></td>
+  </tr>
+  {% else %}<tr><td colspan="6" class="text-muted text-center py-4">No open lines right now.</td></tr>{% endfor %}
+  </tbody>
+</table>
+{% endblock %}

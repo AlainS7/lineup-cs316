@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% from "_macros.html" import status_badge, exposure_bar %}
+{% set title = book.name %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2 class="mb-0">{{ book.name }} <small class="text-muted fs-6">your book</small></h2>
+  <div>
+    <a class="btn btn-outline-secondary btn-sm" href="{{ url_for('books.public', id=book.id) }}">Public page</a>
+    <a class="btn btn-outline-secondary btn-sm" href="{{ url_for('books.edit') }}">Settings</a>
+    <a class="btn btn-primary btn-sm" href="{{ url_for('books.new_line') }}">Post a line</a>
+  </div>
+</div>
+
+<div class="row g-3 mb-4 text-center">
+  <div class="col-md-3"><div class="card"><div class="card-body"><div class="fs-4 font-monospace text-success">${{ '%.2f'|format(pnl.collected) }}</div><div class="text-muted small">collected from losing bets</div></div></div></div>
+  <div class="col-md-3"><div class="card"><div class="card-body"><div class="fs-4 font-monospace text-danger">${{ '%.2f'|format(pnl.paid_out) }}</div><div class="text-muted small">profit paid to winners</div></div></div></div>
+  <div class="col-md-3"><div class="card"><div class="card-body"><div class="fs-4 font-monospace {{ 'text-success' if pnl.collected - pnl.paid_out >= 0 else 'text-danger' }}">{{ '%+.2f'|format(pnl.collected - pnl.paid_out) }}</div><div class="text-muted small">net</div></div></div></div>
+  <div class="col-md-3"><div class="card"><div class="card-body"><div class="fs-4 font-monospace text-warning">${{ '%.2f'|format(pnl.at_risk) }}</div><div class="text-muted small">at risk on pending bets</div></div></div></div>
+</div>
+
+<h4>Lines</h4>
+<p class="text-muted small">Default exposure limit for new lines: ${{ '%.2f'|format(book.default_exposure_limit) }}. A line stops accepting bets once its pending liability would exceed its limit.</p>
+<div class="table-responsive">
+<table class="table bg-white align-middle table-sm">
+  <thead class="table-light"><tr><th>Game</th><th>Start</th><th>Pick</th><th class="text-end">Odds</th><th>Exposure</th><th class="text-end">Pending</th><th>Status</th><th></th></tr></thead>
+  <tbody>
+  {% for l in lines %}
+  <tr class="{% if not l.is_open %}text-muted{% endif %}">
+    <td><a href="{{ url_for('games.detail', id=l.game_id) }}" class="text-decoration-none">{{ l.away_abbr }} @ {{ l.home_abbr }}</a>
+      {% if l.game_status == 'final' %}<small class="text-muted">{{ l.away_score }}–{{ l.home_score }}</small>{% endif %}</td>
+    <td><small>{{ l.start_time.strftime('%b %d %I:%M %p') }}</small></td>
+    <td class="fw-semibold">{{ l.market|line(l.side, l.line_value, l.home_abbr, l.away_abbr) }}</td>
+    <td class="text-end font-monospace">{{ l.odds_american|american }}</td>
+    <td>{{ exposure_bar(l.exposure, l.exposure_limit) }}</td>
+    <td class="text-end">{{ l.pending_slips }}</td>
+    <td>{% if l.is_open %}<span class="badge bg-success">open</span>{% else %}<span class="badge bg-secondary">closed</span>{% endif %} {{ status_badge(l.game_status) }}</td>
+    <td class="text-end text-nowrap">
+      <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('books.edit_line', line_id=l.id) }}">Edit</a>
+      <form class="d-inline" method="post" action="{{ url_for('books.toggle_line', line_id=l.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button class="btn btn-sm btn-outline-{{ 'warning' if l.is_open else 'success' }}">{{ 'Close' if l.is_open else 'Reopen' }}</button></form>
+      {% if l.pending_slips == 0 %}
+      <form class="d-inline" method="post" action="{{ url_for('books.delete_line', line_id=l.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button class="btn btn-sm btn-outline-danger">Delete</button></form>
+      {% endif %}
+    </td>
+  </tr>
+  {% else %}<tr><td colspan="8" class="text-center text-muted py-4">No lines yet. <a href="{{ url_for('books.new_line') }}">Post your first line.</a></td></tr>{% endfor %}
+  </tbody>
+</table>
+</div>
+
+<h4 class="mt-4">Recent action against your lines</h4>
+<table class="table bg-white table-sm">
+  <thead class="table-light"><tr><th>Bet</th><th>User</th><th>Type</th><th class="text-end">Stake</th><th class="text-end">Potential payout</th><th>Placed</th><th>Status</th></tr></thead>
+  <tbody>
+  {% for s in action %}
+  <tr><td>#{{ s.id }}</td><td><a href="{{ url_for('users.public_profile', id=s.user_id) }}">{{ s.full_name }}</a></td><td>{{ s.kind }}</td>
+      <td class="text-end font-monospace">${{ '%.2f'|format(s.stake) }}</td><td class="text-end font-monospace">${{ '%.2f'|format(s.potential_payout) }}</td>
+      <td>{{ s.placed_at.strftime('%b %d %I:%M %p') }}</td><td>{{ status_badge(s.status) }}</td></tr>
+  {% else %}<tr><td colspan="7" class="text-muted text-center">No bets against your lines yet.</td></tr>{% endfor %}
+  </tbody>
+</table>
+{% endblock %}
