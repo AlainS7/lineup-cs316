@@ -1,0 +1,24 @@
+{# Shared snippets #}
+{% macro status_badge(status) -%}
+  {% set color = {'pending': 'secondary', 'won': 'success', 'lost': 'danger', 'push': 'info',
+                  'void': 'dark', 'scheduled': 'primary', 'in_progress': 'warning',
+                  'final': 'dark', 'postponed': 'secondary'}[status] %}
+  <span class="badge bg-{{ color }}">{{ status.replace('_', ' ') }}</span>
+{%- endmacro %}
+
+{% macro game_label(g) -%}
+  {{ g.away_abbr }} @ {{ g.home_abbr }}
+{%- endmacro %}
+
+{% macro line_label(l) -%}
+  {{ l.market|line(l.side, l.line_value, l.home_abbr, l.away_abbr) }}
+{%- endmacro %}
+
+{% macro exposure_bar(exposure, limit) -%}
+  {% set pct = (100 * exposure / limit) if limit else 100 %}
+  <div class="progress" style="height: 6px; min-width: 80px;" title="${{ '%.2f'|format(exposure) }} of ${{ '%.2f'|format(limit) }}">
+    <div class="progress-bar {% if pct >= 90 %}bg-danger{% elif pct >= 60 %}bg-warning{% else %}bg-success{% endif %}"
+         style="width: {{ [pct, 100]|min }}%"></div>
+  </div>
+  <small class="text-muted">${{ '%.0f'|format(exposure) }} / ${{ '%.0f'|format(limit) }}</small>
+{%- endmacro %}

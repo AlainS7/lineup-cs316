@@ -1,0 +1,4 @@
+/* Small touches on top of Bootstrap. */
+.font-monospace { font-variant-numeric: tabular-nums; }
+.table td, .table th { vertical-align: middle; }
+.navbar-brand { letter-spacing: .5px; }

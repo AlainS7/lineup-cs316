@@ -1,0 +1,4 @@
+id,key,name,espn_path
+1,nfl,NFL,football/nfl
+2,nba,NBA,basketball/nba
+3,ncaaf,College Football,football/college-football
