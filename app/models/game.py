@@ -36,7 +36,7 @@ JOIN Sports s ON s.id = g.sport_id
 LEFT JOIN Lines l ON l.game_id = g.id
 WHERE (:sport IS NULL OR s.key = :sport)
   AND (:q IS NULL OR g.home_team ILIKE '%' || :q || '%' OR g.away_team ILIKE '%' || :q || '%'
-       OR g.home_abbr ILIKE :q OR g.away_abbr ILIKE :q)
+       OR g.home_abbr ILIKE '%' || :q || '%' OR g.away_abbr ILIKE '%' || :q || '%')
   {status_clause}
 GROUP BY g.id, s.id
 ORDER BY {order}
