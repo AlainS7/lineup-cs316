@@ -30,6 +30,13 @@
     </select>
   </div>
   <div class="col-md-2 d-grid"><button class="btn btn-primary">Filter</button></div>
+  <div class="col-12 form-check ms-1">
+    <input class="form-check-input" type="checkbox" name="show_all" value="1"
+           id="show_all" {% if show_all %}checked{% endif %}>
+    <label class="form-check-label text-muted" for="show_all">
+      Include upcoming games with no open lines
+    </label>
+  </div>
 </form>
 
 <div class="table-responsive">

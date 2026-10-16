@@ -14,10 +14,13 @@ class Game:
         return app.db.execute("SELECT id, key, name FROM Sports ORDER BY name")
 
     @staticmethod
-    def browse(sport=None, q=None, status='upcoming', sort='time', limit=100, offset=0):
+    def browse(sport=None, q=None, status='upcoming', sort='time', limit=100, offset=0,
+               has_lines=True):
         """Game list for the home page. status: upcoming | final | all.
         Each row carries the number of open lines and the best (highest)
-        moneyline odds on each team across all books."""
+        moneyline odds on each team across all books. has_lines drops
+        scheduled games with nothing left to bet on; games that already
+        started are kept either way, since their lines are always closed."""
         order = Game.SORTS.get(sort, Game.SORTS['time'])
         status_clause = {
             'upcoming': "AND g.status IN ('scheduled', 'in_progress')",
@@ -39,9 +42,12 @@ WHERE (:sport IS NULL OR s.key = :sport)
        OR g.home_abbr ILIKE '%' || :q || '%' OR g.away_abbr ILIKE '%' || :q || '%')
   {status_clause}
 GROUP BY g.id, s.id
+HAVING NOT :has_lines OR g.status <> 'scheduled'
+    OR COUNT(l.id) FILTER (WHERE l.is_open) > 0
 ORDER BY {order}
 LIMIT :limit OFFSET :offset
-""", sport=sport or None, q=q or None, limit=limit, offset=offset)
+""", sport=sport or None, q=q or None, limit=limit, offset=offset,
+             has_lines=has_lines)
 
     @staticmethod
     def get(id):

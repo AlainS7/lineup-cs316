@@ -13,9 +13,13 @@ def index():
     q = request.args.get('q', '').strip()
     status = request.args.get('status', 'upcoming')
     sort = request.args.get('sort', 'time')
-    games = Game.browse(sport=sport, q=q, status=status, sort=sort)
+    # Unchecked by default: a scheduled game with no open line is not bettable.
+    show_all = request.args.get('show_all') == '1'
+    games = Game.browse(sport=sport, q=q, status=status, sort=sort,
+                        has_lines=not show_all)
     return render_template('index.html', games=games, sports=Game.sports(),
-                           sport=sport, q=q, status=status, sort=sort)
+                           sport=sport, q=q, status=status, sort=sort,
+                           show_all=show_all)
 
 
 @bp.route('/leaderboard')
