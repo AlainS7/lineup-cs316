@@ -3,7 +3,9 @@
 {% block content %}
 <div class="d-flex justify-content-between align-items-end mb-3">
   <h2 class="mb-0">{% if status == 'final' %}Results{% elif status == 'all' %}All games{% else %}Upcoming games{% endif %}</h2>
-  <span class="text-muted">{{ games|length }} games</span>
+  <span class="text-muted">
+    {% if games %}Showing {{ first }}–{{ first + games|length - 1 }}{% else %}No games{% endif %}
+  </span>
 </div>
 
 <form class="row g-2 mb-3" method="get">
@@ -66,4 +68,20 @@
   </tbody>
 </table>
 </div>
+
+{% if page > 1 or has_next %}
+{% set args = {'sport': sport or None, 'q': q or None, 'status': status,
+               'sort': sort, 'show_all': '1' if show_all else None} %}
+<nav class="d-flex justify-content-between align-items-center">
+  {% if page > 1 %}
+    <a class="btn btn-outline-secondary btn-sm"
+       href="{{ url_for('index.index', page=page - 1, **args) }}">&larr; Previous</a>
+  {% else %}<span></span>{% endif %}
+  <span class="text-muted small">Page {{ page }}</span>
+  {% if has_next %}
+    <a class="btn btn-outline-secondary btn-sm"
+       href="{{ url_for('index.index', page=page + 1, **args) }}">Next &rarr;</a>
+  {% else %}<span></span>{% endif %}
+</nav>
+{% endif %}
 {% endblock %}
