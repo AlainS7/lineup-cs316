@@ -13,17 +13,24 @@ Built on Flask + PostgreSQL following the Mini-Amazon skeleton architecture.
 
 ## Setup
 
-Everything runs inside the course container
-(`docker compose exec -it ubuntu bash --login`). The container already sets
-`PGHOST`, `PGUSER`, and `PGPASSWORD`.
+Everything runs inside the course container. From the `container` directory on
+your laptop, with Docker Desktop running:
+
+```bash
+docker compose start                        # `docker compose up -d` the first time
+docker compose exec -it ubuntu bash --login
+```
+
+Inside the container (it already sets `PGHOST`, `PGUSER` and `PGPASSWORD`; the
+container image has no `python3-venv`, so packages go in the user site):
 
 ```bash
 cd ~/shared/container/proj/line-up
-python3 -m venv ~/lineup-venv          # keep the venv outside the shared folder
-source ~/lineup-venv/bin/activate
-pip install -r requirements.txt
-flask db-init                           # creates the `lineup` database and loads db/data/*.csv
-./lineup.sh                             # http://localhost:8080
+pip3 install --user --break-system-packages -r requirements.txt   # first time only
+export PATH=$HOME/.local/bin:$PATH
+flask db-init                                    # creates the `lineup` database and loads db/data/*.csv
+python3 -m pytest tests -q -p no:cacheprovider   # should report 29 passed
+./lineup.sh                                      # dev server; open http://localhost:8080 on the laptop
 ```
 
 Seed accounts all use the password `password`: `alain@duke.edu` (also runs "Blue
@@ -31,10 +38,11 @@ Devil Book"), `maya@duke.edu`, `jordan@duke.edu`, `sam@duke.edu`,
 `riley@duke.edu`. `house@lineup.local` owns the "Consensus" book that the ingest
 job posts ESPN lines under.
 
-Running on a laptop instead of in the container: create `.env` in this directory
-with `PGHOST=localhost`, `PGPORT=<port docker mapped for 5432>`, `PGUSER`,
-`PGPASSWORD`, then the same commands (use `./lineup.sh 8081` since Docker holds
-8080).
+Running on a laptop instead of in the container: create a venv with
+`python3 -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt`,
+create `.env` in this directory with `PGHOST=localhost`,
+`PGPORT=<output of docker compose port postgres 5432>`, `PGUSER`, `PGPASSWORD`,
+then the same commands (use `./lineup.sh 8081` since Docker holds 8080).
 
 ## Jobs
 
