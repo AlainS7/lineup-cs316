@@ -1,13 +1,13 @@
 id,sport_id,external_id,home_team,away_team,home_abbr,away_abbr,start_time,status,home_score,away_score,updated_at
-1,1,seed-1,Philadelphia Eagles,Dallas Cowboys,PHI,DAL,2026-10-10 20:00:00+00,final,27,20,2026-10-14 19:02:16+00
-2,1,seed-2,Kansas City Chiefs,Baltimore Ravens,KC,BAL,2026-10-11 20:00:00+00,final,17,24,2026-10-14 19:02:16+00
-3,2,seed-3,Boston Celtics,Miami Heat,BOS,MIA,2026-10-12 23:00:00+00,final,112,101,2026-10-14 19:02:16+00
-4,2,seed-4,Los Angeles Lakers,Denver Nuggets,LAL,DEN,2026-10-13 02:00:00+00,final,105,110,2026-10-14 19:02:16+00
-5,1,seed-5,Denver Broncos,Seattle Seahawks,DEN,SEA,2026-10-16 00:00:00+00,scheduled,,,2026-10-14 19:02:16+00
-6,1,seed-6,Jacksonville Jaguars,Houston Texans,JAX,HOU,2026-10-18 17:00:00+00,scheduled,,,2026-10-14 19:02:16+00
-7,1,seed-7,Atlanta Falcons,Chicago Bears,ATL,CHI,2026-10-18 17:00:00+00,scheduled,,,2026-10-14 19:02:16+00
-8,1,seed-8,San Francisco 49ers,Green Bay Packers,SF,GB,2026-10-18 20:00:00+00,scheduled,,,2026-10-14 19:02:16+00
-9,2,seed-9,Golden State Warriors,Phoenix Suns,GS,PHX,2026-10-15 02:00:00+00,scheduled,,,2026-10-14 19:02:16+00
-10,2,seed-10,New York Knicks,Milwaukee Bucks,NY,MIL,2026-10-17 23:00:00+00,scheduled,,,2026-10-14 19:02:16+00
-11,2,seed-11,Oklahoma City Thunder,Dallas Mavericks,OKC,DAL,2026-10-19 00:00:00+00,scheduled,,,2026-10-14 19:02:16+00
-12,3,seed-12,Duke Blue Devils,North Carolina Tar Heels,DUKE,UNC,2026-10-20 19:00:00+00,scheduled,,,2026-10-14 19:02:16+00
+1,1,seed-1,Philadelphia Eagles,Dallas Cowboys,PHI,DAL,2026-10-25 20:00:00+00,final,27,20,2026-10-29 15:20:36+00
+2,1,seed-2,Kansas City Chiefs,Baltimore Ravens,KC,BAL,2026-10-26 20:00:00+00,final,17,24,2026-10-29 15:20:36+00
+3,2,seed-3,Boston Celtics,Miami Heat,BOS,MIA,2026-10-27 23:00:00+00,final,112,101,2026-10-29 15:20:36+00
+4,2,seed-4,Los Angeles Lakers,Denver Nuggets,LAL,DEN,2026-10-28 02:00:00+00,final,105,110,2026-10-29 15:20:36+00
+5,1,seed-5,Denver Broncos,Seattle Seahawks,DEN,SEA,2026-10-31 00:00:00+00,scheduled,,,2026-10-29 15:20:36+00
+6,1,seed-6,Jacksonville Jaguars,Houston Texans,JAX,HOU,2026-11-02 17:00:00+00,scheduled,,,2026-10-29 15:20:36+00
+7,1,seed-7,Atlanta Falcons,Chicago Bears,ATL,CHI,2026-11-02 17:00:00+00,scheduled,,,2026-10-29 15:20:36+00
+8,1,seed-8,San Francisco 49ers,Green Bay Packers,SF,GB,2026-11-02 20:00:00+00,scheduled,,,2026-10-29 15:20:36+00
+9,2,seed-9,Golden State Warriors,Phoenix Suns,GS,PHX,2026-10-30 02:00:00+00,scheduled,,,2026-10-29 15:20:36+00
+10,2,seed-10,New York Knicks,Milwaukee Bucks,NY,MIL,2026-11-01 23:00:00+00,scheduled,,,2026-10-29 15:20:36+00
+11,2,seed-11,Oklahoma City Thunder,Dallas Mavericks,OKC,DAL,2026-11-03 00:00:00+00,scheduled,,,2026-10-29 15:20:36+00
+12,3,seed-12,Duke Blue Devils,North Carolina Tar Heels,DUKE,UNC,2026-11-04 19:00:00+00,scheduled,,,2026-10-29 15:20:36+00

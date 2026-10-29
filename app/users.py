@@ -40,7 +40,6 @@ def login():
 class RegistrationForm(FlaskForm):
     full_name = StringField('Full Name', validators=[DataRequired(), Length(max=255)])
     email = StringField('Email', validators=[DataRequired(), Email()])
-    address = StringField('Address', validators=[Length(max=255)])
     password = PasswordField('Password', validators=[DataRequired(), Length(min=6)])
     password2 = PasswordField('Repeat Password',
                               validators=[DataRequired(), EqualTo('password', 'Passwords must match.')])
@@ -57,7 +56,7 @@ def register():
         return redirect(url_for('index.index'))
     form = RegistrationForm()
     if form.validate_on_submit():
-        User.register(form.email.data, form.password.data, form.full_name.data, form.address.data or '')
+        User.register(form.email.data, form.password.data, form.full_name.data or '')
         flash('Account created. You can log in now.', 'success')
         return redirect(url_for('users.login'))
     return render_template('register.html', title='Register', form=form)
@@ -72,7 +71,6 @@ def logout():
 class ProfileForm(FlaskForm):
     full_name = StringField('Full Name', validators=[DataRequired(), Length(max=255)])
     email = StringField('Email', validators=[DataRequired(), Email()])
-    address = StringField('Address', validators=[Length(max=255)])
     password = PasswordField('New Password (leave blank to keep)', validators=[Optional(), Length(min=6)])
     password2 = PasswordField('Repeat New Password', validators=[EqualTo('password', 'Passwords must match.')])
     submit = SubmitField('Save')
@@ -95,7 +93,7 @@ def account():
     funds = FundsForm()
     if 'submit' in request.form and form.validate_on_submit():
         User.update_profile(current_user.id, form.email.data, form.full_name.data,
-                            form.address.data or '', form.password.data or None)
+                            form.password.data or None)
         flash('Profile updated.', 'success')
         return redirect(url_for('users.account'))
     if ('topup' in request.form or 'withdraw' in request.form) and funds.validate_on_submit():

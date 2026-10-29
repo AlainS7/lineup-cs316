@@ -10,7 +10,6 @@ CREATE TABLE Users (
     email       VARCHAR(255) UNIQUE NOT NULL,
     password    VARCHAR(255) NOT NULL,          -- werkzeug hash, never plaintext
     full_name   VARCHAR(255) NOT NULL,
-    address     VARCHAR(255) NOT NULL DEFAULT '',
     balance     NUMERIC(12, 2) NOT NULL DEFAULT 0 CHECK (balance >= 0),
     created_at  TIMESTAMPTZ NOT NULL DEFAULT current_timestamp
 );

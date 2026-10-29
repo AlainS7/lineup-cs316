@@ -18,11 +18,11 @@ WHERE l.game_id = :g AND b.name = :b AND l.market = :m AND l.side = :s
 
 
 def test_register_login_logout(client):
-    r = client.post('/register', data={'full_name': 'Test User', 'email': 'test@duke.edu', 'address': '',
+    r = client.post('/register', data={'full_name': 'Test User', 'email': 'test@duke.edu',
                                        'password': 'secret1', 'password2': 'secret1'}, follow_redirects=True)
     assert b'Account created' in r.data
     # Duplicate email is rejected.
-    r = client.post('/register', data={'full_name': 'Dup', 'email': 'test@duke.edu', 'address': '',
+    r = client.post('/register', data={'full_name': 'Dup', 'email': 'test@duke.edu',
                                        'password': 'secret1', 'password2': 'secret1'})
     assert b'already exists' in r.data
     # Wrong password fails, right one succeeds.
@@ -182,9 +182,9 @@ def test_account_funds_and_profile(client, app):
     client.post('/account', data={'amount': '50', 'withdraw': 'Withdraw'})
     assert balance(app, 'riley@duke.edu') == start + 50
     # Cannot change email to one already in use.
-    r = client.post('/account', data={'full_name': 'Riley B', 'email': 'maya@duke.edu', 'address': '',
+    r = client.post('/account', data={'full_name': 'Riley B', 'email': 'maya@duke.edu',
                                       'password': '', 'password2': '', 'submit': 'Save'})
     assert b'already uses that email' in r.data
-    r = client.post('/account', data={'full_name': 'Riley B', 'email': 'riley@duke.edu', 'address': 'Raleigh',
+    r = client.post('/account', data={'full_name': 'Riley B', 'email': 'riley@duke.edu',
                                       'password': '', 'password2': '', 'submit': 'Save'}, follow_redirects=True)
     assert b'Profile updated' in r.data

@@ -1,7 +1,7 @@
-id,email,password,full_name,address,balance,created_at
-1,house@lineup.local,scrypt:32768:8:1$gosDHPbuokPG7QfM$5b4ccff003cecafe5156e40c49f48bbd542b343b6ee920c22f84fed90acffccd64ee88f49a87d9920b81a732d2c0e3da7ae8da3823a2ab6805455b9f2b089165,Line-up House,"Durham, NC",0.00,2026-09-14 19:02:16+00
-2,alain@duke.edu,scrypt:32768:8:1$gosDHPbuokPG7QfM$5b4ccff003cecafe5156e40c49f48bbd542b343b6ee920c22f84fed90acffccd64ee88f49a87d9920b81a732d2c0e3da7ae8da3823a2ab6805455b9f2b089165,Alain Soto,"Durham, NC",955.00,2026-09-24 19:02:16+00
-3,maya@duke.edu,scrypt:32768:8:1$gosDHPbuokPG7QfM$5b4ccff003cecafe5156e40c49f48bbd542b343b6ee920c22f84fed90acffccd64ee88f49a87d9920b81a732d2c0e3da7ae8da3823a2ab6805455b9f2b089165,Maya Chen,"Durham, NC",1044.20,2026-09-26 19:02:16+00
-4,jordan@duke.edu,scrypt:32768:8:1$gosDHPbuokPG7QfM$5b4ccff003cecafe5156e40c49f48bbd542b343b6ee920c22f84fed90acffccd64ee88f49a87d9920b81a732d2c0e3da7ae8da3823a2ab6805455b9f2b089165,Jordan Patel,"Durham, NC",919.09,2026-09-29 19:02:16+00
-5,sam@duke.edu,scrypt:32768:8:1$gosDHPbuokPG7QfM$5b4ccff003cecafe5156e40c49f48bbd542b343b6ee920c22f84fed90acffccd64ee88f49a87d9920b81a732d2c0e3da7ae8da3823a2ab6805455b9f2b089165,Sam Okafor,"Chapel Hill, NC",890.00,2026-10-04 19:02:16+00
-6,riley@duke.edu,scrypt:32768:8:1$gosDHPbuokPG7QfM$5b4ccff003cecafe5156e40c49f48bbd542b343b6ee920c22f84fed90acffccd64ee88f49a87d9920b81a732d2c0e3da7ae8da3823a2ab6805455b9f2b089165,Riley Brooks,"Raleigh, NC",905.00,2026-10-09 19:02:16+00
+id,email,password,full_name,balance,created_at
+1,house@lineup.local,scrypt:32768:8:1$OhysQGUuvXFeQARK$b8b77bc3bd1343693df9c0f9ba986b8a925a59816d9d49f229f56c5c9c407d456e7fdcea1453cc06265c8c32f2ba2e3a700edb8f54285dd2780d9fd047b68222,Line-up House,0.00,2026-09-29 15:20:36+00
+2,alain@duke.edu,scrypt:32768:8:1$OhysQGUuvXFeQARK$b8b77bc3bd1343693df9c0f9ba986b8a925a59816d9d49f229f56c5c9c407d456e7fdcea1453cc06265c8c32f2ba2e3a700edb8f54285dd2780d9fd047b68222,Alain Soto,955.00,2026-10-09 15:20:36+00
+3,maya@duke.edu,scrypt:32768:8:1$OhysQGUuvXFeQARK$b8b77bc3bd1343693df9c0f9ba986b8a925a59816d9d49f229f56c5c9c407d456e7fdcea1453cc06265c8c32f2ba2e3a700edb8f54285dd2780d9fd047b68222,Maya Chen,1044.20,2026-10-11 15:20:36+00
+4,jordan@duke.edu,scrypt:32768:8:1$OhysQGUuvXFeQARK$b8b77bc3bd1343693df9c0f9ba986b8a925a59816d9d49f229f56c5c9c407d456e7fdcea1453cc06265c8c32f2ba2e3a700edb8f54285dd2780d9fd047b68222,Jordan Patel,919.09,2026-10-14 15:20:36+00
+5,sam@duke.edu,scrypt:32768:8:1$OhysQGUuvXFeQARK$b8b77bc3bd1343693df9c0f9ba986b8a925a59816d9d49f229f56c5c9c407d456e7fdcea1453cc06265c8c32f2ba2e3a700edb8f54285dd2780d9fd047b68222,Sam Okafor,890.00,2026-10-19 15:20:36+00
+6,riley@duke.edu,scrypt:32768:8:1$OhysQGUuvXFeQARK$b8b77bc3bd1343693df9c0f9ba986b8a925a59816d9d49f229f56c5c9c407d456e7fdcea1453cc06265c8c32f2ba2e3a700edb8f54285dd2780d9fd047b68222,Riley Brooks,905.00,2026-10-24 15:20:36+00
