@@ -40,6 +40,14 @@ def app():
     application = create_app(config.Config)
     application.config["WTF_CSRF_ENABLED"] = False
     application.config["TESTING"] = True
+
+    # Keep upcoming test games in the future regardless of today's date.
+    application.db.execute("""
+        UPDATE Games
+        SET start_time = CURRENT_TIMESTAMP + INTERVAL '7 days'
+        WHERE status = 'scheduled'
+    """)
+
     yield application
     application.db.engine.dispose()
 
