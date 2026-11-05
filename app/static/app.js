@@ -23,40 +23,17 @@ document.addEventListener('input', function (e) {
   out.textContent = isFinite(total) ? total.toFixed(2) : '0.00';
 });
 
-// Dark mode toggle
-const themeToggle = document.getElementById("theme-toggle");
-const html = document.documentElement;
-
-// Load saved theme preference
-let savedTheme = localStorage.getItem("lineup-theme") || "light";
-
-html.setAttribute("data-bs-theme", savedTheme);
-
-function updateThemeButton() {
-    if (!themeToggle) return;
-
-    if (html.getAttribute("data-bs-theme") === "dark") {
-        themeToggle.textContent = "☀ Light mode";
-        themeToggle.setAttribute("aria-label", "Switch to light mode");
-    } else {
-        themeToggle.textContent = "☾ Dark mode";
-        themeToggle.setAttribute("aria-label", "Switch to dark mode");
-    }
-}
-
-updateThemeButton();
-
-// Toggle theme when clicked
-if (themeToggle) {
-    themeToggle.addEventListener("click", function () {
-        const currentTheme = html.getAttribute("data-bs-theme");
-
-        const newTheme = currentTheme === "dark" ? "light" : "dark";
-
-        html.setAttribute("data-bs-theme", newTheme);
-
-        localStorage.setItem("lineup-theme", newTheme);
-
-        updateThemeButton();
-    });
-}
+// Dark mode toggle. base.html applies the saved/OS theme before paint; this flips and saves it.
+(function () {
+  var btn = document.getElementById('theme-toggle');
+  if (!btn) return;
+  var root = document.documentElement;
+  function sync() { btn.setAttribute('aria-pressed', root.getAttribute('data-bs-theme') === 'dark' ? 'true' : 'false'); }
+  sync();
+  btn.addEventListener('click', function () {
+    var next = root.getAttribute('data-bs-theme') === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-bs-theme', next);
+    try { localStorage.setItem('lu-theme', next); } catch (e) {}
+    sync();
+  });
+})();
