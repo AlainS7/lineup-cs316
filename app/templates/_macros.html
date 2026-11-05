@@ -1,24 +1,96 @@
-{# Shared snippets #}
+{# Shared snippets. Import what you need:
+   {% from "_macros.html" import money, dt, status_badge %} #}
+
+{# ---------- Formatting ---------- #}
+
+{# $1,234.50 -- use for every dollar amount #}
+{% macro money(x) -%}
+  ${{ '{:,.2f}'.format(x) }}
+{%- endmacro %}
+
+{# +$12.00 / −$12.00 -- profit and loss figures #}
+{% macro signed(x) -%}
+  {{ '+' if x >= 0 else '−' }}${{ '{:,.2f}'.format(x|abs) }}
+{%- endmacro %}
+
+{# 7:30 PM #}
+{% macro clock(d) -%}
+  {{ d.hour % 12 or 12 }}:{{ '%02d'|format(d.minute) }} {{ d.strftime('%p') }}
+{%- endmacro %}
+
+{# Wed, Nov 4 #}
+{% macro day_label(d) -%}
+  {{ d.strftime('%a') }}, {{ d.strftime('%b') }} {{ d.day }}
+{%- endmacro %}
+
+{# Nov 4, 7:30 PM #}
+{% macro dt(d) -%}
+  {{ d.strftime('%b') }} {{ d.day }}, {{ clock(d) }}
+{%- endmacro %}
+
+{# Wednesday, Nov 4 at 7:30 PM #}
+{% macro dt_long(d) -%}
+  {{ d.strftime('%A, %b') }} {{ d.day }} at {{ clock(d) }}
+{%- endmacro %}
+
+{# Nov 4, 2026, 7:30 PM #}
+{% macro dt_full(d) -%}
+  {{ d.strftime('%b') }} {{ d.day }}, {{ d.year }}, {{ clock(d) }}
+{%- endmacro %}
+
+{# Nov 4, 2026 #}
+{% macro date(d) -%}
+  {{ d.strftime('%b') }} {{ d.day }}, {{ d.year }}
+{%- endmacro %}
+
+{# ---------- Labels ---------- #}
+
+{# Colour comes from .tag-<status> in style.css #}
 {% macro status_badge(status) -%}
-  {% set color = {'pending': 'secondary', 'won': 'success', 'lost': 'danger', 'push': 'info',
-                  'void': 'dark', 'scheduled': 'primary', 'in_progress': 'warning',
-                  'final': 'dark', 'postponed': 'secondary'}[status] %}
-  <span class="badge bg-{{ color }}">{{ status.replace('_', ' ') }}</span>
+  <span class="tag tag-{{ status }}">{{ status.replace('_', ' ')|capitalize }}</span>
+{%- endmacro %}
+
+{% macro tag(label, kind='') -%}
+  <span class="tag {% if kind %}tag-{{ kind }}{% endif %}">{{ label }}</span>
 {%- endmacro %}
 
 {% macro game_label(g) -%}
-  {{ g.away_abbr }} @ {{ g.home_abbr }}
+  {{ g.away_abbr }} at {{ g.home_abbr }}
 {%- endmacro %}
 
 {% macro line_label(l) -%}
   {{ l.market|line(l.side, l.line_value, l.home_abbr, l.away_abbr) }}
 {%- endmacro %}
 
+{# ---------- Components ---------- #}
+
+{# A price. With href it is a link, without it is a plain label, with no price it is a dash. #}
+{% macro odds_chip(odds, href=None, label='') -%}
+  {% if odds is none -%}
+    <span class="odds odds-none" role="img" aria-label="No price">—</span>
+  {%- elif href -%}
+    <a class="odds" href="{{ href }}" aria-label="{{ label }} {{ odds|american }}">{{ odds|american }}</a>
+  {%- else -%}
+    <span class="odds odds-static">{{ odds|american }}</span>
+  {%- endif %}
+{%- endmacro %}
+
+{# One figure inside a <div class="ledger">. tone: 'pos', 'neg' or '' #}
+{% macro stat(value, label, tone='') -%}
+  <div class="ledger-item">
+    <div class="ledger-value {{ tone }}">{{ value }}</div>
+    <div class="ledger-label">{{ label }}</div>
+  </div>
+{%- endmacro %}
+
 {% macro exposure_bar(exposure, limit) -%}
   {% set pct = (100 * exposure / limit) if limit else 100 %}
-  <div class="progress" style="height: 6px; min-width: 80px;" title="${{ '%.2f'|format(exposure) }} of ${{ '%.2f'|format(limit) }}">
-    <div class="progress-bar {% if pct >= 90 %}bg-danger{% elif pct >= 60 %}bg-warning{% else %}bg-success{% endif %}"
-         style="width: {{ [pct, 100]|min }}%"></div>
+  {% set shown = [pct, 100]|min %}
+  <div class="meter" role="progressbar" aria-label="Exposure used"
+       aria-valuenow="{{ shown|round|int }}" aria-valuemin="0" aria-valuemax="100"
+       title="${{ '%.2f'|format(exposure) }} of ${{ '%.2f'|format(limit) }}">
+    <span class="meter-fill {% if pct >= 90 %}meter-hot{% elif pct >= 60 %}meter-warm{% endif %}"
+          style="width: {{ shown }}%"></span>
   </div>
-  <small class="text-muted">${{ '%.0f'|format(exposure) }} / ${{ '%.0f'|format(limit) }}</small>
+  <span class="meter-text">${{ '%.0f'|format(exposure) }} of ${{ '%.0f'|format(limit) }}</span>
 {%- endmacro %}
