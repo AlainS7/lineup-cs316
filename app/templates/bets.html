@@ -1,30 +1,37 @@
 {% extends "base.html" %}
-{% from "_macros.html" import status_badge %}
+{% from "_macros.html" import status_badge, money, dt %}
 {% set title = 'My Bets' %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
   <h2 class="mb-0">My bets</h2>
-  <div class="btn-group btn-group-sm">
+  <div class="btn-group btn-group-sm" role="group" aria-label="Filter by status">
     {% for s in [None, 'pending', 'won', 'lost', 'push'] %}
-    <a class="btn btn-outline-secondary {% if status == s %}active{% endif %}" href="{{ url_for('bets.history', status=s) }}">{{ s or 'all' }}</a>
+    <a class="btn btn-outline-secondary text-capitalize {% if status == s %}active{% endif %}"
+       {% if status == s %}aria-current="true"{% endif %}
+       href="{{ url_for('bets.history', status=s) }}">{{ s or 'all' }}</a>
     {% endfor %}
   </div>
 </div>
-<table class="table bg-white align-middle">
-  <thead class="table-light"><tr><th>#</th><th>Placed</th><th>Type</th><th>Games</th><th class="text-end">Stake</th><th class="text-end">To win</th><th class="text-end">Paid</th><th>Status</th></tr></thead>
+<div class="table-wrap table-responsive">
+<table class="table align-middle">
+  <thead><tr>
+    <th>#</th><th>Placed</th><th>Type</th><th>Games</th>
+    <th class="num">Stake</th><th class="num">To win</th><th class="num">Paid</th><th>Status</th>
+  </tr></thead>
   <tbody>
   {% for s in slips %}
   <tr>
     <td><a href="{{ url_for('bets.detail', id=s.id) }}">#{{ s.id }}</a></td>
-    <td>{{ s.placed_at.strftime('%b %d %I:%M %p') }}</td>
-    <td>{{ s.kind }}{% if s.kind == 'parlay' %} ({{ s.legs }} legs){% endif %}</td>
-    <td>{{ s.games }}</td>
-    <td class="text-end font-monospace">${{ '%.2f'|format(s.stake) }}</td>
-    <td class="text-end font-monospace">${{ '%.2f'|format(s.potential_payout) }}</td>
-    <td class="text-end font-monospace">{% if s.payout is not none %}${{ '%.2f'|format(s.payout) }}{% else %}—{% endif %}</td>
+    <td>{{ dt(s.placed_at) }}</td>
+    <td>{{ s.kind|capitalize }}{% if s.kind == 'parlay' %} ({{ s.legs }} legs){% endif %}</td>
+    <td>{{ s.games|replace(' @ ', ' at ') }}</td>
+    <td class="num">{{ money(s.stake) }}</td>
+    <td class="num">{{ money(s.potential_payout) }}</td>
+    <td class="num">{% if s.payout is not none %}{{ money(s.payout) }}{% else %}—{% endif %}</td>
     <td>{{ status_badge(s.status) }}</td>
   </tr>
-  {% else %}<tr><td colspan="8" class="text-center text-muted py-4">No bets {% if status %}with status "{{ status }}"{% else %}yet{% endif %}.</td></tr>{% endfor %}
+  {% else %}<tr><td colspan="8" class="text-center text-body-secondary py-4">No bets {% if status %}with status "{{ status }}"{% else %}yet{% endif %}.</td></tr>{% endfor %}
   </tbody>
 </table>
+</div>
 {% endblock %}

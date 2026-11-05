@@ -1,17 +1,25 @@
 {% extends "base.html" %}
+{% from "_macros.html" import money, signed %}
 {% set title = 'Leaderboard' %}
 {% block content %}
 <h2>Leaderboard</h2>
-<p class="text-muted">Ranked by net winnings on settled bets.</p>
-<table class="table bg-white">
-  <thead class="table-light"><tr><th>#</th><th>User</th><th class="text-end">Record</th><th class="text-end">Wagered</th><th class="text-end">Net</th></tr></thead>
+<p class="text-body-secondary">Ranked by net winnings on settled bets.</p>
+<div class="table-wrap table-responsive">
+<table class="table align-middle">
+  <thead><tr>
+    <th>#</th><th>User</th><th class="num">Record</th><th class="num">Wagered</th><th class="num">Net</th>
+  </tr></thead>
   <tbody>
   {% for r in rows %}
-  <tr><td>{{ loop.index }}</td><td><a href="{{ url_for('users.public_profile', id=r.id) }}">{{ r.full_name }}</a></td>
-      <td class="text-end">{{ r.wins }}–{{ r.losses }}</td>
-      <td class="text-end font-monospace">${{ '%.2f'|format(r.wagered) }}</td>
-      <td class="text-end font-monospace {{ 'text-success' if r.net >= 0 else 'text-danger' }}">{{ '%+.2f'|format(r.net) }}</td></tr>
-  {% else %}<tr><td colspan="5" class="text-muted text-center py-4">Nothing settled yet.</td></tr>{% endfor %}
+  <tr {% if current_user.is_authenticated and current_user.id == r.id %}class="table-active"{% endif %}>
+    <td><span class="rank {% if loop.index == 1 %}rank-1{% endif %}">{{ loop.index }}</span></td>
+    <td><a href="{{ url_for('users.public_profile', id=r.id) }}">{{ r.full_name }}</a></td>
+    <td class="num">{{ r.wins }}–{{ r.losses }}</td>
+    <td class="num">{{ money(r.wagered) }}</td>
+    <td class="num {{ 'pos' if r.net >= 0 else 'neg' }}">{{ signed(r.net) }}</td>
+  </tr>
+  {% else %}<tr><td colspan="5" class="text-body-secondary text-center py-4">Nothing settled yet.</td></tr>{% endfor %}
   </tbody>
 </table>
+</div>
 {% endblock %}

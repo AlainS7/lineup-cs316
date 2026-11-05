@@ -1,86 +1,83 @@
 {% extends "base.html" %}
-{% from "_macros.html" import status_badge %}
+{% from "_macros.html" import status_badge, odds_chip, day_label, clock %}
+{% set title = 'Results' if status == 'final' else ('All games' if status == 'all' else 'Games') %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-end mb-3">
-  <h2 class="mb-0">{% if status == 'final' %}Results{% elif status == 'all' %}All games{% else %}Upcoming games{% endif %}</h2>
-  <span class="text-muted">
-    {% if games %}Showing {{ first }}–{{ first + games|length - 1 }}{% else %}No games{% endif %}
-  </span>
+<div class="page-head">
+  <h2>{% if status == 'final' %}Results{% elif status == 'all' %}All games{% else %}Upcoming games{% endif %}</h2>
+  <span class="page-meta">{% if games %}Showing {{ first }}–{{ first + games|length - 1 }}{% else %}No games{% endif %}</span>
 </div>
 
-<form class="row g-2 mb-3" method="get">
-  <div class="col-md-3">
-    <select class="form-select" name="sport">
-      <option value="">All sports</option>
-      {% for s in sports %}<option value="{{ s.key }}" {% if s.key == sport %}selected{% endif %}>{{ s.name }}</option>{% endfor %}
-    </select>
-  </div>
-  <div class="col-md-3"><input class="form-control" name="q" value="{{ q }}" placeholder="Search team"></div>
-  <div class="col-md-2">
-    <select class="form-select" name="status">
-      <option value="upcoming" {% if status == 'upcoming' %}selected{% endif %}>Upcoming</option>
-      <option value="final" {% if status == 'final' %}selected{% endif %}>Final</option>
-      <option value="all" {% if status == 'all' %}selected{% endif %}>All</option>
-    </select>
-  </div>
-  <div class="col-md-2">
-    <select class="form-select" name="sort">
-      <option value="time" {% if sort == 'time' %}selected{% endif %}>Soonest first</option>
-      <option value="time_desc" {% if sort == 'time_desc' %}selected{% endif %}>Latest first</option>
-      <option value="sport" {% if sort == 'sport' %}selected{% endif %}>By sport</option>
-      <option value="lines" {% if sort == 'lines' %}selected{% endif %}>Most lines</option>
-    </select>
-  </div>
-  <div class="col-md-2 d-grid"><button class="btn btn-primary">Filter</button></div>
-  <div class="col-12 form-check ms-1">
-    <input class="form-check-input" type="checkbox" name="show_all" value="1"
-           id="show_all" {% if show_all %}checked{% endif %}>
-    <label class="form-check-label text-muted" for="show_all">
-      Include upcoming games with no open lines
-    </label>
+<nav class="tabs" aria-label="Game status">
+  {% for key, label in [('upcoming', 'Upcoming'), ('final', 'Results'), ('all', 'All games')] %}
+  <a class="tab {% if status == key %}active{% endif %}" {% if status == key %}aria-current="page"{% endif %}
+     href="{{ url_for('index.index', status=key, sport=sport or None, q=q or None, sort=sort, show_all='1' if show_all else None) }}">{{ label }}</a>
+  {% endfor %}
+</nav>
+
+<form class="filters" method="get" role="search" aria-label="Filter games">
+  <input type="hidden" name="status" value="{{ status }}">
+  <select class="form-select" name="sport" aria-label="Sport">
+    <option value="">All sports</option>
+    {% for s in sports %}<option value="{{ s.key }}" {% if s.key == sport %}selected{% endif %}>{{ s.name }}</option>{% endfor %}
+  </select>
+  <input class="form-control filter-search" type="search" name="q" value="{{ q }}" placeholder="Search team" aria-label="Search team">
+  <select class="form-select" name="sort" aria-label="Sort order">
+    <option value="time" {% if sort == 'time' %}selected{% endif %}>Soonest first</option>
+    <option value="time_desc" {% if sort == 'time_desc' %}selected{% endif %}>Latest first</option>
+    <option value="sport" {% if sort == 'sport' %}selected{% endif %}>By sport</option>
+    <option value="lines" {% if sort == 'lines' %}selected{% endif %}>Most lines</option>
+  </select>
+  <button class="btn btn-primary">Filter</button>
+  <div class="form-check filters-check">
+    <input class="form-check-input" type="checkbox" name="show_all" value="1" id="show_all" {% if show_all %}checked{% endif %}>
+    <label class="form-check-label text-body-secondary" for="show_all">Include games with no open lines</label>
   </div>
 </form>
 
-<div class="table-responsive">
-<table class="table table-hover align-middle bg-white">
-  <thead class="table-light"><tr>
-    <th>Sport</th><th>Matchup</th><th>Start</th><th>Status</th>
-    <th class="text-end">Best ML (away / home)</th><th class="text-end">Lines</th><th></th>
-  </tr></thead>
-  <tbody>
-  {% for g in games %}
-  <tr>
-    <td><span class="badge bg-secondary">{{ g.sport }}</span></td>
-    <td><a class="fw-semibold text-decoration-none" href="{{ url_for('games.detail', id=g.id) }}">{{ g.away_team }} @ {{ g.home_team }}</a></td>
-    <td>{{ g.start_time.strftime('%a %b %d, %I:%M %p') }}</td>
-    <td>{{ status_badge(g.status) }}
-      {% if g.status == 'final' %}<span class="ms-1">{{ g.away_score }}–{{ g.home_score }}</span>{% endif %}</td>
-    <td class="text-end font-monospace">
-      {% if g.away_ml is not none %}{{ g.away_ml|american }}{% else %}—{% endif %} /
-      {% if g.home_ml is not none %}{{ g.home_ml|american }}{% else %}—{% endif %}
-    </td>
-    <td class="text-end">{{ g.line_count }} <small class="text-muted">({{ g.book_count }} books)</small></td>
-    <td class="text-end"><a class="btn btn-sm btn-outline-primary" href="{{ url_for('games.detail', id=g.id) }}">View lines</a></td>
-  </tr>
-  {% else %}
-  <tr><td colspan="7" class="text-center text-muted py-4">No games match. Try <code>flask ingest</code> to pull the latest schedule.</td></tr>
-  {% endfor %}
-  </tbody>
-</table>
+{% set ns = namespace(day=None) %}
+{% set by_day = sort in ('time', 'time_desc') %}
+<div class="board">
+{% for g in games %}
+  {% if by_day and g.start_time.date() != ns.day %}
+    {% set ns.day = g.start_time.date() %}
+    <h3 class="board-day">{{ day_label(g.start_time) }}</h3>
+  {% endif %}
+  {% set href = url_for('games.detail', id=g.id) %}
+  {% set final = g.status == 'final' %}
+  <article class="game-row">
+    <div class="game-when">
+      <span class="game-time">{{ clock(g.start_time) }}</span>
+      <span class="game-sport">{{ g.sport }}</span>
+      {% if g.status != 'scheduled' %}{{ status_badge(g.status) }}{% endif %}
+    </div>
+    <a class="game-teams" href="{{ href }}">
+      <span class="team"><span class="team-name">{{ g.away_team }}</span>
+        {% if final %}<span class="team-score {% if g.away_score > g.home_score %}is-winner{% endif %}">{{ g.away_score }}</span>{% endif %}</span>
+      <span class="team"><span class="team-name">{{ g.home_team }}</span>
+        {% if final %}<span class="team-score {% if g.home_score > g.away_score %}is-winner{% endif %}">{{ g.home_score }}</span>{% endif %}</span>
+    </a>
+    <div class="game-prices">
+      {{ odds_chip(g.away_ml, href, g.away_team ~ ' moneyline') }}
+      {{ odds_chip(g.home_ml, href, g.home_team ~ ' moneyline') }}
+    </div>
+    <a class="game-more" href="{{ href }}">{{ g.line_count }} line{{ 's' if g.line_count != 1 }}
+      <small>{{ g.book_count }} book{{ 's' if g.book_count != 1 }}</small></a>
+  </article>
+{% else %}
+  <p class="empty">No games match. Try <code>flask ingest</code> to pull the latest schedule.</p>
+{% endfor %}
 </div>
 
 {% if page > 1 or has_next %}
 {% set args = {'sport': sport or None, 'q': q or None, 'status': status,
                'sort': sort, 'show_all': '1' if show_all else None} %}
-<nav class="d-flex justify-content-between align-items-center">
+<nav class="d-flex justify-content-between align-items-center mt-3" aria-label="Pagination">
   {% if page > 1 %}
-    <a class="btn btn-outline-secondary btn-sm"
-       href="{{ url_for('index.index', page=page - 1, **args) }}">&larr; Previous</a>
+    <a class="btn btn-outline-secondary btn-sm" href="{{ url_for('index.index', page=page - 1, **args) }}">Previous</a>
   {% else %}<span></span>{% endif %}
-  <span class="text-muted small">Page {{ page }}</span>
+  <span class="page-meta small">Page {{ page }}</span>
   {% if has_next %}
-    <a class="btn btn-outline-secondary btn-sm"
-       href="{{ url_for('index.index', page=page + 1, **args) }}">Next &rarr;</a>
+    <a class="btn btn-outline-secondary btn-sm" href="{{ url_for('index.index', page=page + 1, **args) }}">Next</a>
   {% else %}<span></span>{% endif %}
 </nav>
 {% endif %}

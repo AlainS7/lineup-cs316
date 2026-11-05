@@ -1,4 +1,548 @@
-/* Small touches on top of Bootstrap. */
-.font-monospace { font-variant-numeric: tabular-nums; }
+/* Line-up visual system.
+   Flat solid colour, scoreboard type, price-board layout. Bootstrap supplies the
+   grid, forms and JS; everything you see is set by the tokens below.
+   Change colours and fonts here, not in templates. */
+
+@font-face {
+  font-family: "Big Shoulders";
+  src: url("fonts/BigShoulders-Bold.ttf") format("truetype");
+  font-weight: 700; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: "Instrument Sans";
+  src: url("fonts/InstrumentSans-Regular.ttf") format("truetype");
+  font-weight: 400; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: "Instrument Sans";
+  src: url("fonts/InstrumentSans-Bold.ttf") format("truetype");
+  font-weight: 700; font-style: normal; font-display: swap;
+}
+
+:root {
+  /* Palette */
+  --concrete: #ECEDEA;      /* page */
+  --paper: #FFFFFF;         /* sheets */
+  --asphalt: #1B1F24;       /* text, outlines */
+  --slate: #5B636E;         /* secondary text */
+  --rule: #D9DBD6;          /* hairlines */
+  --cobalt: #2338E0;        /* brand, primary actions */
+  --cobalt-deep: #1A2BB5;
+  --cobalt-tint: #E3E6FC;
+  --highlighter: #FFD60A;   /* the one warm accent */
+  --highlighter-tint: #FFF5BF;
+  --pitch: #0B7A50;         /* wins */
+  --pitch-tint: #DCF0E6;
+  --brick: #C23B2E;         /* losses */
+  --brick-tint: #F8E2DF;
+
+  --font-display: "Big Shoulders", "Arial Narrow", Impact, sans-serif;
+  --font-body: "Instrument Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+
+  /* Point Bootstrap at the tokens */
+  --bs-body-font-family: var(--font-body);
+  --bs-body-bg: var(--concrete);
+  --bs-body-color: var(--asphalt);
+  --bs-secondary-color: var(--slate);
+  --bs-border-color: var(--rule);
+  --bs-link-color: var(--cobalt);
+  --bs-link-color-rgb: 35, 56, 224;
+  --bs-link-hover-color-rgb: 26, 43, 181;
+  --bs-border-radius: 6px;
+  --bs-border-radius-lg: 8px;
+  --bs-primary: #2338E0;  --bs-primary-rgb: 35, 56, 224;
+  --bs-success: #0B7A50;  --bs-success-rgb: 11, 122, 80;
+  --bs-danger: #C23B2E;   --bs-danger-rgb: 194, 59, 46;
+  --bs-warning: #FFD60A;  --bs-warning-rgb: 255, 214, 10;
+}
+
+body { background: var(--concrete); color: var(--asphalt); }
+a { text-underline-offset: .18em; }
+:focus-visible { outline: 3px solid var(--cobalt); outline-offset: 2px; border-radius: 4px; }
+.lu-nav :focus-visible, .scoreboard :focus-visible { outline-color: var(--highlighter); }
+
+/* ---------- Type ---------- */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  line-height: 1.02;
+  letter-spacing: .005em;
+  color: var(--asphalt);
+}
+h2 { font-size: clamp(2.6rem, 6vw, 3.75rem); }
+h3 { font-size: 2.1rem; }
+h4 { font-size: 1.8rem; }
+h5 { font-size: 1.45rem; }
+.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.pos { color: var(--pitch); }
+.neg { color: var(--brick); }
+.page-head {
+  display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end;
+  gap: .5rem 1.5rem; margin-bottom: 1.25rem;
+}
+.page-head h2 { margin: 0; }
+.page-meta { color: var(--slate); }
+.lead-note { color: var(--slate); max-width: 62ch; }
+
+/* ---------- Navigation ---------- */
+.navbar.lu-nav { background: var(--cobalt); padding: 0; margin-bottom: 2rem; }
+.lu-nav .navbar-brand {
+  display: inline-flex; align-items: center; gap: .6rem; margin-right: 1.5rem;
+  font-family: var(--font-display); font-weight: 700; font-size: 2rem; line-height: 1;
+  letter-spacing: .01em; color: #fff; padding: .85rem 0;
+}
+.brand-mark { display: block; }
+.lu-nav .nav-link {
+  color: rgba(255, 255, 255, .86); font-weight: 700; font-size: .98rem;
+  padding: 1.15rem .9rem; border-radius: 0;
+}
+.lu-nav .nav-link:hover { color: #fff; }
+.lu-nav .nav-link.active { color: #fff; box-shadow: inset 0 -4px 0 var(--highlighter); background: transparent; }
+.lu-nav .navbar-toggler { border-color: rgba(255, 255, 255, .5); }
+.lu-nav .nav-slip {
+  display: inline-flex; align-items: center; gap: .5rem; margin: .65rem .4rem .65rem 0;
+  padding: .4rem .85rem; border-radius: 6px; background: var(--highlighter); color: var(--asphalt);
+}
+.lu-nav .nav-slip:hover { background: #FFE24D; color: var(--asphalt); }
+.lu-nav .nav-slip.active { box-shadow: none; outline: 2px solid #fff; outline-offset: 1px; }
+.slip-count {
+  min-width: 1.5rem; height: 1.5rem; padding: 0 .4rem; border-radius: 999px;
+  background: var(--asphalt); color: #fff; font-size: .8rem; line-height: 1.5rem; text-align: center;
+}
+.nav-balance { font-family: var(--font-display); font-size: 1.5rem; line-height: 1; color: #fff; margin-left: .35rem; }
+.skip-link {
+  position: absolute; left: .5rem; top: -4rem; z-index: 1100;
+  background: var(--paper); padding: .5rem .75rem; border-radius: 6px;
+}
+.skip-link:focus { top: .5rem; }
+@media (max-width: 991.98px) {
+  .lu-nav .nav-link { padding: .7rem 0; }
+  .lu-nav .nav-link.active { box-shadow: inset 4px 0 0 var(--highlighter); padding-left: .75rem; }
+  .lu-nav .nav-slip { margin: .5rem 0; align-self: flex-start; }
+}
+
+/* ---------- Sheets (white surfaces) ---------- */
+.sheet, .card, .table-wrap {
+  background: var(--paper); border: 0; border-radius: 8px; box-shadow: none;
+}
+.sheet { overflow: hidden; }
+.card-header { background: transparent; border-bottom: 1px solid var(--rule); font-family: var(--font-display); font-size: 1.4rem; font-weight: 700; }
+.table-responsive { position: relative; }
+.table-wrap { overflow: hidden; }
+.table-wrap > .table { margin-bottom: 0; }
+
+/* ---------- Tables ---------- */
+.table { --bs-table-bg: transparent; --bs-table-hover-bg: #F6F7F4; --bs-table-border-color: var(--rule); --bs-table-striped-bg: transparent; }
+.table > :not(caption) > * > * { padding: .8rem 1rem; }
+.table-sm > :not(caption) > * > * { padding: .55rem .75rem; }
+.table thead th {
+  font-size: .85rem; font-weight: 700; color: var(--slate); white-space: nowrap;
+  border-bottom: 1px solid var(--rule); background: transparent;
+}
+.table tbody tr:last-child > * { border-bottom-width: 0; }
 .table td, .table th { vertical-align: middle; }
-.navbar-brand { letter-spacing: .5px; }
+.table-active { --bs-table-bg: var(--highlighter-tint); --bs-table-active-bg: var(--highlighter-tint); box-shadow: inset 4px 0 0 var(--highlighter); }
+.table-warning { --bs-table-bg: var(--highlighter-tint); }
+.table-secondary { --bs-table-bg: #F4F5F2; }
+.rank { font-family: var(--font-display); font-weight: 700; font-size: 1.7rem; line-height: 1; color: var(--slate); }
+.rank-1 { color: var(--cobalt); }
+@media (max-width: 767.98px) { .table-wrap td, .table-wrap th { white-space: nowrap; } }
+
+/* ---------- Tags (status labels) ---------- */
+.tag {
+  display: inline-block; padding: .1rem .6rem; border-radius: 999px;
+  font-size: .8rem; font-weight: 700; line-height: 1.55; white-space: nowrap;
+  background: #E6E8E4; color: var(--asphalt);
+}
+.tag-scheduled, .tag-open { background: var(--cobalt-tint); color: var(--cobalt-deep); }
+.tag-in_progress { background: var(--highlighter); color: var(--asphalt); }
+.tag-final, .tag-void { background: var(--asphalt); color: #fff; }
+.tag-won { background: var(--pitch-tint); color: var(--pitch); }
+.tag-lost { background: var(--brick-tint); color: var(--brick); }
+.tag-push, .tag-pending, .tag-postponed, .tag-closed { background: #E6E8E4; color: var(--slate); }
+.scoreboard .tag { background: rgba(255, 255, 255, .18); color: #fff; }
+.scoreboard .tag-in_progress { background: var(--highlighter); color: var(--asphalt); }
+
+/* ---------- Odds chips ---------- */
+.odds {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 4.6rem; height: 2.3rem; padding: 0 .7rem;
+  border: 2px solid var(--asphalt); border-radius: 6px; background: var(--paper);
+  font-family: var(--font-display); font-weight: 700; font-size: 1.45rem; line-height: 1;
+  color: var(--asphalt); text-decoration: none; font-variant-numeric: tabular-nums;
+  transition: background-color .12s, color .12s, border-color .12s;
+}
+a.odds:hover { background: var(--cobalt); border-color: var(--cobalt); color: #fff; }
+.odds-none { border-color: var(--rule); color: #9BA1A9; }
+.odds-static { border-color: transparent; background: var(--cobalt-tint); color: var(--cobalt-deep); }
+
+/* ---------- Tabs and filters ---------- */
+.tabs { display: flex; gap: 1.5rem; border-bottom: 2px solid var(--rule); margin-bottom: 1rem; overflow-x: auto; }
+.tab {
+  padding: .6rem 0; margin-bottom: -2px; border-bottom: 4px solid transparent;
+  font-weight: 700; color: var(--slate); text-decoration: none; white-space: nowrap;
+}
+.tab:hover { color: var(--asphalt); }
+.tab.active { color: var(--asphalt); border-bottom-color: var(--cobalt); }
+.filters { display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; margin-bottom: 1.25rem; }
+.filters .form-select { width: auto; min-width: 9.5rem; }
+.filters .filter-search { flex: 1 1 12rem; max-width: 20rem; }
+.filters .filters-check { margin: 0 0 0 .5rem; }
+
+/* ---------- The board (games list) ---------- */
+.board { background: var(--paper); border-radius: 8px; overflow: hidden; }
+.board-day {
+  margin: 0; padding: .55rem 1.25rem; background: #F4F5F2; border-top: 1px solid var(--rule);
+  font-family: var(--font-body); font-size: .95rem; font-weight: 700; letter-spacing: 0; color: var(--slate);
+}
+.board-day:first-child { border-top: 0; }
+.game-row {
+  display: grid; grid-template-columns: 7.5rem minmax(0, 1fr) 5.2rem 6.5rem;
+  align-items: center; column-gap: 1.25rem; padding: .85rem 1.25rem; border-top: 1px solid var(--rule);
+}
+.board-day + .game-row { border-top: 0; }
+.game-row:first-child { border-top: 0; }
+.game-when { display: flex; flex-direction: column; align-items: flex-start; gap: .25rem; }
+.game-time { font-weight: 700; }
+.game-sport { font-size: .85rem; font-weight: 700; color: var(--slate); text-transform: uppercase; }
+.game-teams { display: block; color: var(--asphalt); text-decoration: none; }
+.game-teams:hover .team-name { text-decoration: underline; text-decoration-thickness: 2px; text-decoration-color: var(--cobalt); }
+.team { display: flex; align-items: center; justify-content: space-between; gap: 1rem; height: 2.9rem; }
+.team-name { font-family: var(--font-display); font-weight: 700; font-size: 1.7rem; line-height: 1; }
+.team-score { font-family: var(--font-display); font-size: 1.7rem; line-height: 1; min-width: 2ch; text-align: right; }
+.team-score.is-winner { color: var(--cobalt); }
+.game-prices { display: grid; grid-auto-rows: 2.9rem; align-items: center; justify-items: center; }
+.game-more { font-weight: 700; font-size: .95rem; text-align: right; text-decoration: none; line-height: 1.25; }
+.game-more small { display: block; font-weight: 400; color: var(--slate); }
+.empty { padding: 2.5rem 1.25rem; text-align: center; color: var(--slate); margin: 0; }
+@media (max-width: 767.98px) {
+  .game-row { grid-template-columns: minmax(0, 1fr) 5rem; row-gap: .35rem; padding: .8rem 1rem; }
+  .game-when { grid-column: 1 / -1; flex-direction: row; align-items: center; gap: .6rem; }
+  .game-more { grid-column: 1 / -1; text-align: left; }
+  .game-more small { display: inline; margin-left: .35rem; }
+  .board-day { padding-inline: 1rem; }
+}
+
+/* ---------- Game page ---------- */
+.scoreboard {
+  display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 1.5rem;
+  background: var(--cobalt); color: #fff; border-radius: 10px; padding: 2rem 2.25rem; margin-bottom: 2rem;
+}
+.sb-abbr { font-family: var(--font-display); font-weight: 700; font-size: clamp(4.2rem, 10vw, 7.5rem); line-height: .85; }
+.sb-name { margin-top: .5rem; font-size: 1.05rem; opacity: .92; }
+.sb-home { text-align: right; }
+.sb-mid { display: flex; flex-direction: column; align-items: center; gap: .4rem; text-align: center; }
+.sb-at { font-family: var(--font-display); font-size: 2rem; line-height: 1; opacity: .75; }
+.sb-score { font-family: var(--font-display); font-weight: 700; font-size: clamp(3rem, 6vw, 4.5rem); line-height: 1; color: var(--highlighter); white-space: nowrap; }
+.sb-score span { font-size: 1.4rem; margin: 0 .5rem; color: #fff; opacity: .8; }
+.sb-when { font-size: .95rem; opacity: .95; }
+@media (max-width: 767.98px) {
+  .scoreboard { grid-template-columns: 1fr 1fr; padding: 1.5rem 1.25rem; gap: 1rem; }
+  .sb-mid { grid-column: 1 / -1; grid-row: 2; flex-direction: row; justify-content: space-between; flex-wrap: wrap; }
+}
+.market { margin-bottom: 2rem; }
+.market h3 { margin-bottom: .6rem; }
+
+.line-row {
+  display: grid; grid-template-columns: minmax(0, 1fr) 6.5rem 11rem 16rem;
+  align-items: center; gap: .75rem 1.25rem; padding: 1rem 1.25rem; border-top: 1px solid var(--rule);
+}
+.line-row:first-child { border-top: 0; }
+.line-row.is-closed .line-pick, .line-row.is-closed .line-book { opacity: .55; }
+.line-pick { font-family: var(--font-display); font-weight: 700; font-size: 1.85rem; line-height: 1; }
+.line-book { display: inline-block; margin-top: .3rem; font-size: .9rem; color: var(--slate); text-decoration: none; }
+a.line-book:hover { color: var(--cobalt); text-decoration: underline; }
+.line-odds { display: flex; flex-direction: column; align-items: flex-start; gap: .25rem; }
+.line-odds small { color: var(--slate); font-size: .8rem; }
+.line-action { display: flex; justify-content: flex-end; }
+.line-action form { display: flex; flex-wrap: nowrap; gap: .4rem; }
+.line-action .btn { white-space: nowrap; }
+.line-action .input-group { width: 6.5rem; flex: 0 0 auto; }
+.stake-input { width: 100%; }
+@media (max-width: 767.98px) {
+  .line-row { grid-template-columns: minmax(0, 1fr) auto; padding: .9rem 1rem; }
+  .line-exposure, .line-action { grid-column: 1 / -1; }
+  .line-action { justify-content: flex-start; }
+  .line-odds { grid-column: 2; grid-row: 1; align-items: flex-end; }
+}
+
+/* Exposure meter */
+.meter { height: 6px; min-width: 80px; border-radius: 3px; background: #E3E5E0; overflow: hidden; }
+.meter-fill { display: block; height: 100%; background: var(--pitch); }
+.meter-warm { background: #E0B000; }
+.meter-hot { background: var(--brick); }
+.meter-text { display: block; margin-top: .3rem; font-size: .8rem; color: var(--slate); }
+
+/* ---------- Bet slip ---------- */
+.slip-row {
+  display: grid; grid-template-columns: minmax(0, 1.5fr) 5.5rem minmax(7rem, 1fr) 9rem 6rem 2.6rem;
+  align-items: center; gap: .75rem 1.25rem; padding: 1rem 1.25rem; border-top: 1px solid var(--rule);
+}
+.slip-row:first-child { border-top: 0; }
+.slip-row.is-problem { background: var(--highlighter-tint); }
+.slip-game { font-size: .9rem; font-weight: 700; text-decoration: none; }
+.slip-time { color: var(--slate); font-size: .85rem; margin-left: .4rem; }
+.slip-main .line-pick { margin-top: .35rem; }
+.cell-label { display: block; margin-bottom: .2rem; font-size: .8rem; color: var(--slate); }
+.slip-win strong { font-size: 1.05rem; font-variant-numeric: tabular-nums; }
+.slip-remove { text-align: right; }
+@media (max-width: 767.98px) {
+  .slip-row { grid-template-columns: minmax(0, 1fr) auto; padding: .9rem 1rem; }
+  .slip-odds { grid-column: 2; grid-row: 1; }
+  .slip-exposure { grid-column: 1 / -1; }
+  .slip-stake { grid-column: 1; }
+  .slip-win { grid-column: 2; text-align: right; }
+  .slip-remove { grid-column: 1 / -1; text-align: left; }
+}
+.placer { height: 100%; padding: 1.5rem; }
+.placer h4 { margin-bottom: .9rem; }
+.placer dl { margin: 0 0 1.25rem; }
+.kv div { display: flex; justify-content: space-between; padding: .55rem 0; border-top: 1px solid var(--rule); }
+.kv dt { font-weight: 400; }
+.kv dd { margin: 0; font-weight: 700; font-variant-numeric: tabular-nums; }
+.placer .btn { width: 100%; padding: .8rem 1rem; font-size: 1.05rem; }
+.placer-parlay { background: var(--asphalt); color: #fff; }
+.placer-parlay h4 { color: #fff; }
+.placer-parlay .input-group-text { background: #2A3038; border-color: #3A424C; color: #fff; }
+.placer-parlay .form-control { background: #2A3038; border-color: #3A424C; color: #fff; }
+.placer-parlay .text-body-secondary { color: #B9BFC7 !important; }
+.btn-parlay { --bs-btn-bg: var(--highlighter); --bs-btn-border-color: var(--highlighter); --bs-btn-color: var(--asphalt);
+  --bs-btn-hover-bg: #FFE24D; --bs-btn-hover-border-color: #FFE24D; --bs-btn-hover-color: var(--asphalt);
+  --bs-btn-disabled-bg: var(--highlighter); --bs-btn-disabled-border-color: var(--highlighter); --bs-btn-disabled-color: var(--asphalt); }
+
+/* ---------- Ledger (figures in a row) ---------- */
+.ledger {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr)); gap: 1px;
+  background: var(--rule); border-radius: 8px; overflow: hidden; margin-bottom: 2rem;
+}
+.ledger-item { background: var(--paper); padding: 1.25rem 1.5rem; }
+.ledger-value { font-family: var(--font-display); font-weight: 700; font-size: clamp(2.2rem, 5vw, 3rem); line-height: 1; font-variant-numeric: tabular-nums; }
+.ledger-label { margin-top: .4rem; font-size: .9rem; color: var(--slate); }
+.balance-figure { font-family: var(--font-display); font-weight: 700; font-size: 4.5rem; line-height: 1; color: var(--pitch); margin: 0 0 1rem; }
+
+/* ---------- Buttons and forms ---------- */
+.btn { font-weight: 700; border-radius: 6px; letter-spacing: 0; }
+.btn-primary {
+  --bs-btn-bg: var(--cobalt); --bs-btn-border-color: var(--cobalt); --bs-btn-color: #fff;
+  --bs-btn-hover-bg: var(--cobalt-deep); --bs-btn-hover-border-color: var(--cobalt-deep); --bs-btn-hover-color: #fff;
+  --bs-btn-active-bg: var(--cobalt-deep); --bs-btn-active-border-color: var(--cobalt-deep);
+  --bs-btn-disabled-bg: var(--cobalt); --bs-btn-disabled-border-color: var(--cobalt);
+}
+.btn-success {
+  --bs-btn-bg: var(--pitch); --bs-btn-border-color: var(--pitch); --bs-btn-color: #fff;
+  --bs-btn-hover-bg: #09663F; --bs-btn-hover-border-color: #09663F; --bs-btn-hover-color: #fff;
+}
+.btn-outline-primary, .btn-outline-secondary, .btn-outline-warning {
+  --bs-btn-color: var(--asphalt); --bs-btn-border-color: var(--asphalt);
+  --bs-btn-hover-bg: var(--asphalt); --bs-btn-hover-border-color: var(--asphalt); --bs-btn-hover-color: #fff;
+  --bs-btn-active-bg: var(--asphalt); --bs-btn-active-border-color: var(--asphalt); --bs-btn-active-color: #fff;
+  border-width: 2px;
+}
+.btn-outline-success {
+  --bs-btn-color: var(--pitch); --bs-btn-border-color: var(--pitch);
+  --bs-btn-hover-bg: var(--pitch); --bs-btn-hover-border-color: var(--pitch); --bs-btn-hover-color: #fff;
+  border-width: 2px;
+}
+.btn-outline-danger {
+  --bs-btn-color: var(--brick); --bs-btn-border-color: var(--brick);
+  --bs-btn-hover-bg: var(--brick); --bs-btn-hover-border-color: var(--brick); --bs-btn-hover-color: #fff;
+  border-width: 2px;
+}
+.btn-link { color: var(--cobalt); font-weight: 700; }
+.form-control, .form-select { border: 1.5px solid #C4C7C1; border-radius: 6px; background-color: var(--paper); }
+.form-control:focus, .form-select:focus { border-color: var(--cobalt); box-shadow: 0 0 0 3px rgba(35, 56, 224, .2); }
+.input-group-text { background: #F1F2EF; border: 1.5px solid #C4C7C1; font-weight: 700; color: var(--slate); }
+.form-label { font-weight: 700; font-size: .92rem; margin-bottom: .35rem; }
+.form-text { color: var(--slate); }
+.form-check-input:checked { background-color: var(--cobalt); border-color: var(--cobalt); }
+.btn-group .btn.active { background: var(--asphalt); color: #fff; }
+
+.btn:disabled, .btn.disabled { background: #D3D6D0 !important; border-color: #D3D6D0 !important; color: #7A818A !important; opacity: 1; }
+.placer-parlay .btn:disabled { background: #3A424C !important; border-color: #3A424C !important; color: #9AA1AA !important; }
+
+/* ---------- Alerts, breadcrumbs, footer ---------- */
+.alert { border: 0; border-left: 5px solid; border-radius: 6px; color: var(--asphalt); }
+.alert-success { background: var(--pitch-tint); border-color: var(--pitch); }
+.alert-danger { background: var(--brick-tint); border-color: var(--brick); }
+.alert-warning { background: var(--highlighter-tint); border-color: #E0B000; }
+.alert-info, .alert-primary { background: var(--cobalt-tint); border-color: var(--cobalt); }
+.alert-secondary { background: #E6E8E4; border-color: var(--slate); }
+.breadcrumb { --bs-breadcrumb-divider: "/"; font-size: .92rem; margin-bottom: 1rem; }
+.breadcrumb-item.active { color: var(--slate); }
+.site-footer { color: var(--slate); border-color: var(--rule) !important; }
+
+/* =================================
+   DARK MODE
+================================= */
+
+[data-bs-theme="dark"] {
+    color-scheme: dark;
+
+    --concrete: #171A20;
+    --paper: #222731;
+    --asphalt: #F0F1F4;
+    --slate: #A6AFBB;
+    --rule: #39414D;
+
+    --cobalt: #5268F5;
+    --cobalt-deep: #AAB5FF;
+    --cobalt-tint: #303956;
+
+    --highlighter: #FFD60A;
+    --highlighter-tint: #494222;
+
+    --pitch: #55C99A;
+    --pitch-tint: #214638;
+
+    --brick: #F17B70;
+    --brick-tint: #512D30;
+
+    --bs-body-bg: var(--concrete);
+    --bs-body-color: var(--asphalt);
+    --bs-secondary-color: var(--slate);
+    --bs-border-color: var(--rule);
+
+    --bs-link-color: #AAB5FF;
+    --bs-link-hover-color: #D0D6FF;
+
+    --bs-primary: #5268F5;
+    --bs-primary-rgb: 82, 104, 245;
+    --bs-success: #55C99A;
+    --bs-success-rgb: 85, 201, 154;
+    --bs-danger: #F17B70;
+    --bs-danger-rgb: 241, 123, 112;
+}
+
+/* Main backgrounds and text */
+
+[data-bs-theme="dark"] body {
+    background: var(--concrete);
+    color: var(--asphalt);
+}
+
+[data-bs-theme="dark"] h1,
+[data-bs-theme="dark"] h2,
+[data-bs-theme="dark"] h3,
+[data-bs-theme="dark"] h4,
+[data-bs-theme="dark"] h5,
+[data-bs-theme="dark"] h6 {
+    color: var(--asphalt);
+}
+
+/* Cards and content surfaces */
+
+[data-bs-theme="dark"] .sheet,
+[data-bs-theme="dark"] .card,
+[data-bs-theme="dark"] .table-wrap,
+[data-bs-theme="dark"] .board {
+    background: var(--paper);
+    color: var(--asphalt);
+}
+
+[data-bs-theme="dark"] .board-day {
+    background: #2C333E;
+    color: var(--slate);
+}
+
+/* Tables */
+
+[data-bs-theme="dark"] .table {
+    --bs-table-bg: transparent;
+    --bs-table-color: var(--asphalt);
+    --bs-table-hover-bg: #303844;
+    --bs-table-border-color: var(--rule);
+    --bs-table-striped-bg: transparent;
+}
+
+[data-bs-theme="dark"] .table-secondary {
+    --bs-table-bg: #303844;
+    --bs-table-color: var(--asphalt);
+}
+
+[data-bs-theme="dark"] .table-active,
+[data-bs-theme="dark"] .table-warning {
+    --bs-table-bg: var(--highlighter-tint);
+    --bs-table-color: var(--asphalt);
+}
+
+/* Forms */
+
+[data-bs-theme="dark"] .form-control,
+[data-bs-theme="dark"] .form-select,
+[data-bs-theme="dark"] .input-group-text {
+    background-color: #292F39;
+    color: var(--asphalt);
+    border-color: var(--rule);
+}
+
+[data-bs-theme="dark"] .form-control::placeholder {
+    color: #87919E;
+}
+
+/* Odds and tags */
+
+[data-bs-theme="dark"] .odds {
+    background: #292F39;
+    color: var(--asphalt);
+    border-color: #8994A5;
+}
+
+[data-bs-theme="dark"] .odds-static {
+    background: var(--cobalt-tint);
+    color: #D0D6FF;
+}
+
+[data-bs-theme="dark"] .tag {
+    background: #353D48;
+    color: #E1E5EC;
+}
+
+/* Game scoreboard */
+
+[data-bs-theme="dark"] .scoreboard {
+    background: #303D9B;
+}
+
+/* Bet slip */
+
+[data-bs-theme="dark"] .slip-row.is-problem {
+    background: var(--highlighter-tint);
+}
+
+/* Other light surfaces */
+
+[data-bs-theme="dark"] .meter {
+    background: #39414D;
+}
+
+[data-bs-theme="dark"] .site-footer {
+    color: var(--slate);
+}
+
+
+
+/* 1. Force the entire bet slip button container text to be black */
+.lu-nav .nav-slip,
+[data-bs-theme="dark"] .lu-nav .nav-slip {
+  color: #000000 !important;
+}
+
+/* 2. Force the count circle background to stay dark and its number to stay white */
+.lu-nav .nav-slip .slip-count,
+[data-bs-theme="dark"] .lu-nav .nav-slip .slip-count {
+  background: #1B1F24 !important; /* Matches --asphalt */
+  color: #FFFFFF !important;
+}
+
+/* 3. Maintain the clean layout spacing and vertical centering */
+.lu-nav .navbar-nav {
+  display: flex !important;
+  align-items: center !important;
+  flex-direction: row !important;
+}
+
+.lu-nav #theme-toggle,
+.lu-nav .nav-slip {
+  margin: 0 0.5rem !important;
+  align-self: center !important;
+}

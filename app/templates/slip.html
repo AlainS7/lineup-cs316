@@ -1,10 +1,10 @@
 {% extends "base.html" %}
-{% from "_macros.html" import exposure_bar %}
+{% from "_macros.html" import exposure_bar, money, dt, odds_chip %}
 {% set title = 'Bet Slip' %}
 {% block content %}
-<h2>Bet slip</h2>
+<div class="page-head"><h2>Bet slip</h2></div>
 {% if not items %}
-  <p class="text-muted">Your slip is empty. <a href="{{ url_for('index.index') }}">Browse games</a> to add lines.</p>
+  <p class="empty sheet">Your slip is empty. <a href="{{ url_for('index.index') }}">Browse games</a> to add lines.</p>
 {% else %}
 {% if problems %}
 <div class="alert alert-warning">Some lines are closed or their game has started. Remove them before placing.</div>
@@ -12,72 +12,77 @@
 
 <form method="post" action="{{ url_for('slip.update') }}">
 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-<table class="table bg-white align-middle">
-  <thead class="table-light"><tr><th>Game</th><th>Pick</th><th>Book</th><th class="text-end">Odds</th><th>Exposure left</th><th class="text-end" style="width:140px">Stake</th><th class="text-end">To win</th><th></th></tr></thead>
-  <tbody>
+<div class="sheet mb-3">
   {% for it in items %}
-  <tr class="{% if not it.is_open or it.game_status != 'scheduled' %}table-warning{% endif %}">
-    <td><a href="{{ url_for('games.detail', id=it.game_id) }}" class="text-decoration-none">{{ it.away_abbr }} @ {{ it.home_abbr }}</a>
-      <br><small class="text-muted">{{ it.start_time.strftime('%b %d %I:%M %p') }}</small></td>
-    <td class="fw-semibold">{{ it.market|line(it.side, it.line_value, it.home_abbr, it.away_abbr) }}</td>
-    <td>{{ it.book_name }}</td>
-    <td class="text-end font-monospace">{{ it.odds_american|american }}</td>
-    <td>{{ exposure_bar(it.exposure, it.exposure_limit) }}</td>
-    <td><div class="input-group input-group-sm"><span class="input-group-text">$</span>
-      <input class="form-control text-end" type="number" step="0.01" min="0.01" name="stake_{{ it.line_id }}" value="{{ '%.2f'|format(it.stake) }}"></div></td>
-    <td class="text-end font-monospace">${{ '%.2f'|format(it.stake * (it.odds_american|decimal_odds) - it.stake) }}</td>
-    <td class="text-end"><button class="btn btn-sm btn-outline-danger" formaction="{{ url_for('slip.remove', line_id=it.line_id) }}" formmethod="post">✕</button></td>
-  </tr>
+  {% set pick = it.market|line(it.side, it.line_value, it.home_abbr, it.away_abbr) %}
+  <div class="slip-row {% if not it.is_open or it.game_status != 'scheduled' %}is-problem{% endif %}">
+    <div class="slip-main">
+      <a class="slip-game" href="{{ url_for('games.detail', id=it.game_id) }}">{{ it.away_abbr }} at {{ it.home_abbr }}</a>
+      <span class="slip-time">{{ dt(it.start_time) }}</span>
+      <div class="line-pick">{{ pick }}</div>
+      <div class="line-book">{{ it.book_name }}</div>
+    </div>
+    <div class="slip-odds">{{ odds_chip(it.odds_american) }}</div>
+    <div class="slip-exposure"><span class="cell-label">Exposure left</span>{{ exposure_bar(it.exposure, it.exposure_limit) }}</div>
+    <div class="slip-stake">
+      <span class="cell-label">Stake</span>
+      <div class="input-group input-group-sm flex-nowrap"><span class="input-group-text">$</span>
+        <input class="form-control text-end" type="number" step="0.01" min="0.01" name="stake_{{ it.line_id }}"
+               value="{{ '%.2f'|format(it.stake) }}" aria-label="Stake in dollars for {{ pick }}"></div>
+    </div>
+    <div class="slip-win"><span class="cell-label">To win</span><strong>{{ money(it.stake * (it.odds_american|decimal_odds) - it.stake) }}</strong></div>
+    <div class="slip-remove">
+      <button class="btn btn-sm btn-outline-danger" aria-label="Remove {{ pick }} from slip"
+              formaction="{{ url_for('slip.remove', line_id=it.line_id) }}" formmethod="post">&times;</button>
+    </div>
+  </div>
   {% endfor %}
-  </tbody>
-</table>
+</div>
 <div class="d-flex gap-2 mb-4">
   <button class="btn btn-outline-secondary btn-sm">Update stakes</button>
-  <button class="btn btn-outline-danger btn-sm" formaction="{{ url_for('slip.clear') }}" formmethod="post">Clear slip</button>
+  <button class="btn btn-outline-danger btn-sm" data-confirm="Remove every pick from your slip?"
+          formaction="{{ url_for('slip.clear') }}" formmethod="post">Clear slip</button>
 </div>
 </form>
 
 <div class="row g-3">
   <div class="col-md-6">
-    <div class="card h-100">
-      <div class="card-header fw-semibold">Place as {{ items|length }} single bet{{ 's' if items|length != 1 }}</div>
-      <div class="card-body">
-        <p class="mb-1">Each pick is its own bet with its own stake.</p>
-        <dl class="row mb-3">
-          <dt class="col-7">Total stake</dt><dd class="col-5 text-end font-monospace">${{ '%.2f'|format(singles_total) }}</dd>
-          <dt class="col-7">Total payout if all win</dt><dd class="col-5 text-end font-monospace">${{ '%.2f'|format(singles_payout) }}</dd>
-        </dl>
-        <form method="post" action="{{ url_for('slip.place') }}">
-          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-          <input type="hidden" name="kind" value="single">
-          <button class="btn btn-primary w-100" {% if problems %}disabled{% endif %}>Place singles</button>
-        </form>
-      </div>
+    <div class="sheet placer">
+      <h4>Place as {{ items|length }} single bet{{ 's' if items|length != 1 }}</h4>
+      <p class="mb-2 text-body-secondary">Each pick is its own bet with its own stake.</p>
+      <dl class="kv">
+        <div><dt>Total stake</dt><dd>{{ money(singles_total) }}</dd></div>
+        <div><dt>Total payout if all win</dt><dd>{{ money(singles_payout) }}</dd></div>
+      </dl>
+      <form method="post" action="{{ url_for('slip.place') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="kind" value="single">
+        <button class="btn btn-primary" {% if problems %}disabled{% endif %}>Place singles</button>
+      </form>
     </div>
   </div>
   <div class="col-md-6">
-    <div class="card h-100 {% if not parlay_ok %}opacity-75{% endif %}">
-      <div class="card-header fw-semibold">Place as a {{ items|length }}-leg parlay</div>
-      <div class="card-body">
-        {% if not parlay_ok %}
-          <p class="text-muted mb-0">A parlay needs at least two picks from different games
-            {% if items|length >= 2 %}(you have {{ items|length }} picks across {{ n_games }} game{{ 's' if n_games != 1 }}){% endif %}.</p>
-        {% else %}
-          <p class="mb-1">All legs must win. Combined odds: <strong class="font-monospace">{{ '%.2f'|format(parlay_dec) }}x</strong></p>
-          <form method="post" action="{{ url_for('slip.place') }}">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <input type="hidden" name="kind" value="parlay">
-            <div class="input-group mb-2"><span class="input-group-text">Stake $</span>
-              <input class="form-control" type="number" step="0.01" min="0.01" name="parlay_stake" value="{{ '%.2f'|format(parlay_stake) }}"
-                     oninput="document.getElementById('ppay').textContent = (this.value * {{ parlay_dec }}).toFixed(2)"></div>
-            <p>Payout if it hits: <strong class="font-monospace">$<span id="ppay">{{ '%.2f'|format(parlay_payout) }}</span></strong></p>
-            <button class="btn btn-success w-100" {% if problems %}disabled{% endif %}>Place parlay</button>
-          </form>
-        {% endif %}
-      </div>
+    <div class="sheet placer placer-parlay">
+      <h4>Place as a {{ items|length }}-leg parlay</h4>
+      {% if not parlay_ok %}
+        <p class="text-body-secondary mb-0">A parlay needs at least two picks from different games
+          {% if items|length >= 2 %}(you have {{ items|length }} picks across {{ n_games }} game{{ 's' if n_games != 1 }}){% endif %}.</p>
+      {% else %}
+        <p class="mb-2">All legs must win. Combined odds: <strong class="num">{{ '%.2f'|format(parlay_dec) }}x</strong></p>
+        <form method="post" action="{{ url_for('slip.place') }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <input type="hidden" name="kind" value="parlay">
+          <div class="input-group mb-2"><span class="input-group-text">Stake $</span>
+            <input class="form-control" type="number" step="0.01" min="0.01" name="parlay_stake"
+                   value="{{ '%.2f'|format(parlay_stake) }}" aria-label="Parlay stake in dollars"
+                   data-payout-mult="{{ parlay_dec }}" data-payout-target="ppay"></div>
+          <p class="mb-3">Payout if it hits: <strong class="num">$<span id="ppay">{{ '%.2f'|format(parlay_payout) }}</span></strong></p>
+          <button class="btn btn-parlay" {% if problems %}disabled{% endif %}>Place parlay</button>
+        </form>
+      {% endif %}
     </div>
   </div>
 </div>
-<p class="text-muted small mt-3">Your balance: ${{ '%.2f'|format(current_user.balance) }}. Odds are locked at the moment you place the bet.</p>
+<p class="text-body-secondary small mt-3">Your balance is {{ money(current_user.balance) }}. Odds are locked when you place the bet.</p>
 {% endif %}
 {% endblock %}
