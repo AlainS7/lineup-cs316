@@ -1,0 +1,13 @@
+test account email: test.email@gmail.com
+test password: password
+
+test workflow:
+source .venv/Scripts/activate
+export PATH="/c/Program Files/PostgreSQL/18/bin:$PATH"
+python3 -m pytest tests -q -p no:cacheprovider
+    (all 29 pass)
+./lineup.sh 8081
+OPEN http://localhost:8081 IN BROWSER
+
+reset database:
+flask db-init

@@ -38,13 +38,12 @@ def ts(dt):
 
 # ---- Users -------------------------------------------------------------
 users = [
-    # id, email, password, full_name, address, balance, created_at
+    # id, email, password, full_name, balance, created_at
     (
         1,
         "house@lineup.local",
         PASSWORD,
         "Line-up House",
-        "Durham, NC",
         Decimal("0.00"),
         NOW - timedelta(days=30),
     ),
@@ -53,7 +52,6 @@ users = [
         "alain@duke.edu",
         PASSWORD,
         "Alain Soto",
-        "Durham, NC",
         Decimal("1000.00"),
         NOW - timedelta(days=20),
     ),
@@ -62,7 +60,6 @@ users = [
         "maya@duke.edu",
         PASSWORD,
         "Maya Chen",
-        "Durham, NC",
         Decimal("1000.00"),
         NOW - timedelta(days=18),
     ),
@@ -71,7 +68,6 @@ users = [
         "jordan@duke.edu",
         PASSWORD,
         "Jordan Patel",
-        "Durham, NC",
         Decimal("1000.00"),
         NOW - timedelta(days=15),
     ),
@@ -80,7 +76,6 @@ users = [
         "sam@duke.edu",
         PASSWORD,
         "Sam Okafor",
-        "Chapel Hill, NC",
         Decimal("1000.00"),
         NOW - timedelta(days=10),
     ),
@@ -89,12 +84,11 @@ users = [
         "riley@duke.edu",
         PASSWORD,
         "Riley Brooks",
-        "Raleigh, NC",
         Decimal("1000.00"),
         NOW - timedelta(days=5),
     ),
 ]
-balances = {u[0]: u[5] for u in users}
+balances = {u[0]: u[4] for u in users}
 
 # ---- Sports -------------------------------------------------------------
 sports = [
@@ -431,7 +425,7 @@ for user_id, kind, stake, picks, days_ago in bet_specs:
 # Opening top-ups so balance history explains the starting 1000.
 for u in users[1:]:
     tid += 1
-    txns.append((tid, u[0], Decimal("1000.00"), "topup", None, u[6]))
+    txns.append((tid, u[0], Decimal("1000.00"), "topup", None, u[5]))
 txns.sort(key=lambda t: (t[5], t[0]))
 txns = [(i + 1,) + t[1:] for i, t in enumerate(txns)]
 
@@ -443,8 +437,11 @@ cart = [
 
 write(
     "Users",
-    ["id", "email", "password", "full_name", "address", "balance", "created_at"],
-    [(u[0], u[1], u[2], u[3], u[4], f"{balances[u[0]]:.2f}", ts(u[6])) for u in users],
+    ["id", "email", "password", "full_name", "balance", "created_at"],
+    [
+        (u[0], u[1], u[2], u[3], f"{balances[u[0]]:.2f}", ts(u[5]))
+        for u in users
+    ],
 )
 write("Sports", ["id", "key", "name", "espn_path"], sports)
 write(

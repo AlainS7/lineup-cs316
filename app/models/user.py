@@ -6,15 +6,14 @@ from .. import login
 
 
 class User(UserMixin):
-    def __init__(self, id, email, full_name, address, balance, created_at):
+    def __init__(self, id, email, full_name,balance, created_at):
         self.id = id
         self.email = email
         self.full_name = full_name
-        self.address = address
         self.balance = balance
         self.created_at = created_at
 
-    COLS = 'id, email, full_name, address, balance, created_at'
+    COLS = 'id, email, full_name, balance, created_at'
 
     @staticmethod
     def get_by_auth(email, password):
@@ -38,13 +37,13 @@ WHERE email = :email AND (:exclude_id IS NULL OR id <> :exclude_id)
         return len(rows) > 0
 
     @staticmethod
-    def register(email, password, full_name, address=''):
+    def register(email, password, full_name):
         rows = app.db.execute("""
-INSERT INTO Users(email, password, full_name, address, balance)
-VALUES(:email, :password, :full_name, :address, :balance)
+INSERT INTO Users(email, password, full_name, balance)
+VALUES(:email, :password, :full_name, :balance)
 RETURNING id
 """, email=email, password=generate_password_hash(password),
-            full_name=full_name, address=address,
+            full_name=full_name,
             balance=app.config['STARTING_BALANCE'])
         return User.get(rows[0][0])
 
@@ -59,19 +58,19 @@ WHERE id = :id
         return User(*rows[0]) if rows else None
 
     @staticmethod
-    def update_profile(id, email, full_name, address, password=None):
+    def update_profile(id, email, full_name, password=None):
         if password:
             app.db.execute("""
-UPDATE Users SET email = :email, full_name = :full_name, address = :address,
+UPDATE Users SET email = :email, full_name = :full_name,
                  password = :password
 WHERE id = :id
-""", id=id, email=email, full_name=full_name, address=address,
+""", id=id, email=email, full_name=full_name,
                 password=generate_password_hash(password))
         else:
             app.db.execute("""
-UPDATE Users SET email = :email, full_name = :full_name, address = :address
+UPDATE Users SET email = :email, full_name = :full_name
 WHERE id = :id
-""", id=id, email=email, full_name=full_name, address=address)
+""", id=id, email=email, full_name=full_name,)
 
     @staticmethod
     def adjust_balance(id, amount, kind):
