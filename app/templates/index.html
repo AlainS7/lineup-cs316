@@ -4,7 +4,6 @@
 {% block content %}
 <div class="page-head">
   <h2>{% if status == 'final' %}Results{% elif status == 'all' %}All games{% else %}Upcoming games{% endif %}</h2>
-  <span class="page-meta">{% if games %}Showing {{ first }}–{{ first + games|length - 1 }}{% else %}No games{% endif %}</span>
 </div>
 
 <nav class="tabs" aria-label="Game status">
@@ -12,6 +11,7 @@
   <a class="tab {% if status == key %}active{% endif %}" {% if status == key %}aria-current="page"{% endif %}
      href="{{ url_for('index.index', status=key, sport=sport or None, q=q or None, sort=sort, show_all='1' if show_all else None) }}">{{ label }}</a>
   {% endfor %}
+  <span class="page-meta">{% if games %}Showing {{ first }}–{{ first + games|length - 1 }}{% else %}No games{% endif %}</span>
 </nav>
 
 <form class="filters" method="get" role="search" aria-label="Filter games">
