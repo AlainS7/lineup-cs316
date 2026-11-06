@@ -28,6 +28,9 @@
     <option value="lines" {% if sort == 'lines' %}selected{% endif %}>Most lines</option>
   </select>
   <button class="btn btn-primary">Filter</button>
+  {% if sport or q or sort != 'time' or show_all %}
+  <a class="btn btn-outline-secondary" href="{{ url_for('index.index', status=status) }}">Clear filters</a>
+  {% endif %}
   <div class="form-check filters-check">
     <input class="form-check-input" type="checkbox" name="show_all" value="1" id="show_all" {% if show_all %}checked{% endif %}>
     <label class="form-check-label text-body-secondary" for="show_all">Include games with no open lines</label>
